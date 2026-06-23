@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Planilha CNES - Dashboard Completo</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <style>
+        /* ===== RESET E ESTILOS GERAIS ===== */
+        * { margin:0; padding:0; box-sizing:border-box; font-family:Arial,sans-serif; }
+        body { background:#f1f1f1; padding:10px; }
+        .container { max-width:1200px; margin:0 auto; background:#fff; border:1px solid #000; border-radius:8px; overflow:hidden; }
+
+        /* ===== HEADER ===== */
+        .header { border-bottom:2px solid #003c7d; }
+        .header-top { display:flex; align-items:center; justify-content:space-between; padding:10px 15px; flex-wrap:wrap; gap:10px; }
+        .logo-esquerda img, .logo-direita img { height:60px; }
+        .titulos { flex:1; text-align:center; min-width:200px; }
+        .titulos h2 { color:#003c7d; font-size:clamp(14px,2.5vw,18px); }
+        .titulos h3 { color:#003c7d; font-size:clamp(11px,1.8vw,14px); font-weight:normal; }
+        .titulo { background:#003c7d; color:#fff; padding:8px 10px; font-size:clamp(14px,2.5vw,17px); font-weight:bold; text-align:center; }
+        .info-versao { display:flex; flex-wrap:wrap; justify-content:space-between; padding:8px 15px; border-top:1px solid #ccc; font-size:clamp(11px,1.6vw,13px); align-items:center; gap:8px; }
+
+        /* ===== STATUS ===== */
+        .status-conexao { display:flex; align-items:center; gap:6px; font-weight:bold; font-size:13px; padding:3px 12px; border-radius:20px; background:#f8f9fa; border:2px solid #ccc; }
+        .status-conexao .indicador { width:12px; height:12px; border-radius:50%; display:inline-block; }
+        .status-conexao .indicador.online { background:#28a745; box-shadow:0 0 6px #28a745; }
+        .status-conexao .indicador.offline { background:#dc3545; box-shadow:0 0 6px #dc3545; }
+
+        /* ===== DIAGNÓSTICO ===== */
+        .diagnostico { background:#f8f9fa; padding:8px 15px; border-bottom:1px solid #ddd; font-size:13px; font-family:monospace; display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+        .diagnostico .passo { display:flex; align-items:center; gap:4px; padding:2px 10px; border-radius:12px; background:#e9ecef; }
+        .diagnostico .passo.ok { background:#d4edda; color:#155724; }
+        .diagnostico .passo.erro { background:#f8d7da; color:#721c24; }
+        .diagnostico .passo.rodando { background:#fff3cd; color:#856404; }
+
+        /* ===== DASHBOARD ===== */
+        .dashboard { padding:20px; background:#f8f9fa; border-bottom:2px solid #003c7d; }
+        .row { display:flex; flex-wrap:wrap; gap:15px; margin-bottom:15px; }
+        .col-3 { flex:0 0 calc(25% - 15px); min-width:150px; }
+        .col-6 { flex:0 0 calc(50% - 15px); min-width:250px; }
+        .col-12 { flex:0 0 100%; }
+
+        .card-stat { border-left:4px solid #003c7d; background:#fff; border-radius:6px; padding:12px 15px; box-shadow:0 2px 6px rgba(0,0,0,0.05); transition:transform 0.2s; }
+        .card-stat:hover { transform:translateY(-3px); }
+        .card-stat .numero { font-size:26px; font-weight:bold; }
+        .card-stat .label { color:#6c757d; font-size:13px; }
+        .card-stat .icon { font-size:28px; opacity:0.2; }
+
+        .grafico-container { background:#fff; border-radius:6px; padding:15px; border:1px solid #ddd; height:260px; }
+        .ranking-list { max-height:260px; overflow-y:auto; background:#fff; border-radius:6px; padding:5px; border:1px solid #ddd; }
+        .ranking-list .list-group-item { display:flex; justify-content:space-between; align-items:center; padding:6px 10px; border-bottom:1px solid #eee; }
+
+        /* ===== SELETOR ===== */
+        .seletor-unidade { display:flex; flex-wrap:wrap; align-items:center; gap:10px; padding:10px 15px; background:#f9f9f9; border-bottom:1px solid #ccc; }
+        .seletor-unidade select { flex:1 1 250px; padding:5px 8px; border:1px solid #ccc; border-radius:4px; min-height:32px; }
+        .seletor-unidade button { padding:6px 16px; border:none; background:#003c7d; color:#fff; cursor:pointer; border-radius:4px; font-weight:bold; display:inline-flex; align-items:center; gap:6px; transition:background 0.2s; }
+        .seletor-unidade button:disabled { opacity:0.5; cursor:not-allowed; }
+        .btn-pdf { background:#dc3545; }
+        .btn-pdf:hover { background:#c82333 !important; }
+
+        /* ===== TABELAS ===== */
+        .section-title { background:#003c7d; color:#fff; padding:5px 15px; font-weight:bold; }
+        table { width:100%; border-collapse:collapse; }
+        td, th { border:1px solid #b9c3d0; padding:6px 8px; font-size:clamp(11px,1.6vw,13px); vertical-align:middle; }
+        td input, td select { width:100%; border:none; padding:4px 2px; background:transparent; min-height:28px; }
+        td input:disabled, td select:disabled { background:#f5f5f5; color:#333; cursor:default; }
+        .profissionais { overflow-x:auto; }
+        .profissionais table { min-width:900px; }
+        .profissionais th { background:#dbe5f1; text-align:center; }
+        .profissionais td input { text-align:center; background:#fafafa; }
+
+        .sem-dados { text-align:center; padding:30px; color:#6c757d; }
+        .sem-dados i { font-size:40px; display:block; margin-bottom:10px; opacity:0.3; }
+
+        .spinner { display:inline-block; width:16px; height:16px; border:2px solid rgba(255,255,255,0.3); border-radius:50%; border-top-color:#fff; animation:spin 0.6s linear infinite; }
+        @keyframes spin { to { transform:rotate(360deg); } }
+
+        @media (max-width:768px) {
+            .col-3 { flex:0 0 calc(50% - 10px); }
+            .col-6 { flex:0 0 100%; }
+            .diagnostico { font-size:11px; flex-wrap:wrap; }
+        }
+        @media (max-width:480px) {
+            .col-3 { flex:0 0 100%; }
+        }
+
+        @media print {
+            .seletor-unidade, .status-conexao, .diagnostico, .btn-pdf { display:none !important; }
+            .dashboard { display:block !important; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <!-- HEADER -->
+    <div class="header">
+        <div class="header-top">
+            <div class="logo-esquerda"><img src="logo_prefeitura.png" alt="Prefeitura" /></div>
+            <div class="titulos">
+                <h2>PREFEITURA DO MUNICÍPIO DE PORTO VELHO</h2>
+                <h3>SECRETARIA MUNICIPAL DE SAÚDE – SEMUSA</h3>
+                <h3>DIVISÃO DE CONTROLE E AVALIAÇÃO DO SUS</h3>
+            </div>
+            <div class="logo-direita"><img src="logo_cnes.png" alt="CNES" /></div>
+        </div>
+        <div class="titulo">PLANILHA DE ATUALIZAÇÃO CADASTRAL DOS PROFISSIONAIS – CNES</div>
+        <div class="info-versao">
+            <div>Versão: 02</div>
+            <div><input type="date" id="dataEmissao" style="width:auto;max-width:160px;" /></div>
+            <div class="status-conexao" id="statusConexao">
+                <span class="indicador offline" id="indicadorStatus"></span>
+                <span id="textoStatus">Verificando...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- DIAGNÓSTICO -->
+    <div class="diagnostico" id="diagnostico">
+        <span class="passo" id="passo1"><i class="fas fa-circle"></i> 1. Cliente</span>
+        <span class="passo" id="passo2"><i class="fas fa-circle"></i> 2. Tabela</span>
+        <span class="passo" id="passo3"><i class="fas fa-circle"></i> 3. Dados</span>
+        <button onclick="executarDiagnostico()" style="margin-left:auto; background:#6c757d; color:white; border:none; padding:2px 12px; border-radius:12px; font-size:12px; cursor:pointer;"><i class="fas fa-sync-alt"></i> Testar</button>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div class="dashboard">
+        <div class="row">
+            <div class="col-3"><div class="card-stat"><div class="label"><i class="fas fa-user-md"></i> Profissionais</div><div class="numero" id="totalProfissionais">0</div></div></div>
+            <div class="col-3" style="border-left-color:#28a745;"><div class="card-stat"><div class="label"><i class="fas fa-building"></i> Unidades</div><div class="numero" id="totalUnidades">0</div></div></div>
+            <div class="col-3" style="border-left-color:#ffc107;"><div class="card-stat"><div class="label"><i class="fas fa-stethoscope"></i> Médicos</div><div class="numero" id="totalMedicos">0</div></div></div>
+            <div class="col-3" style="border-left-color:#17a2b8;"><div class="card-stat"><div class="label"><i class="fas fa-user-nurse"></i> Enfermeiros</div><div class="numero" id="totalEnfermeiros">0</div></div></div>
+            <div class="col-3" style="border-left-color:#6f42c1;"><div class="card-stat"><div class="label"><i class="fas fa-user-friends"></i> ACS</div><div class="numero" id="totalACS">0</div></div></div>
+            <div class="col-3" style="border-left-color:#fd7e14;"><div class="card-stat"><div class="label"><i class="fas fa-tooth"></i> Dentistas</div><div class="numero" id="totalDentistas">0</div></div></div>
+            <div class="col-3" style="border-left-color:#20c997;"><div class="card-stat"><div class="label"><i class="fas fa-tags"></i> CBOs</div><div class="numero" id="totalCBOs">0</div></div></div>
+            <div class="col-3" style="border-left-color:#e83e8c;"><div class="card-stat"><div class="label"><i class="fas fa-calendar-day"></i> Hoje</div><div class="numero" id="totalHoje">0</div></div></div>
+        </div>
+
+        <div class="row">
+            <div class="col-6"><div class="grafico-container"><canvas id="chartMovimentoMensal"></canvas></div></div>
+            <div class="col-6"><div class="grafico-container"><canvas id="chartMovimentoSemanal"></canvas></div></div>
+        </div>
+
+        <div class="row">
+            <div class="col-6">
+                <div class="ranking-list"><h5 style="padding:5px 0;">🏆 Ranking de Profissionais</h5><ul class="list-group list-group-flush" id="rankingProfissionais"><li class="list-group-item text-center text-muted">Carregando...</li></ul></div>
+            </div>
+            <div class="col-6">
+                <div class="ranking-list"><h5 style="padding:5px 0;">📊 Movimentação por Unidade</h5><ul class="list-group list-group-flush" id="rankingMovimentacao"><li class="list-group-item text-center text-muted">Carregando...</li></ul></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SELETOR DE UNIDADE -->
+    <div class="seletor-unidade">
+        <label for="selecionarUnidade">Unidade:</label>
+        <select id="selecionarUnidade">
+            <option value="">-- Selecione --</option>
+        </select>
+        <button id="btnCarregar" onclick="carregarUnidade()"><i class="fas fa-search"></i> Carregar</button>
+        <button class="btn-pdf" onclick="window.print()"><i class="fas fa-file-pdf"></i> Exportar PDF</button>
+    </div>
+
+    <!-- DADOS DA UNIDADE -->
+    <div class="section-title">1. DADOS DA UNIDADE</div>
+    <table>
+        <tr><td data-label="CNES"><input id="cnes" disabled /></td><td data-label="Nome"><input id="nomeUnidade" disabled /></td><td data-label="UF"><input id="uf" disabled /></td></tr>
+        <tr><td data-label="Tipo"><select id="tipoUnidade" disabled><option value="">Selecione</option></select></td><td data-label="Município"><input id="municipio" disabled /></td><td></td></tr>
+        <tr><td colspan="3" data-label="Endereço"><input id="endereco" disabled style="width:100%;" /></td></tr>
+        <tr><td data-label="Telefone"><input id="telefone" disabled /></td><td colspan="2" data-label="Responsável"><input id="responsavel" disabled /></td></tr>
+        <tr><td data-label="Cargo"><input id="cargoResponsavel" disabled /></td><td colspan="2" data-label="Data Preenchimento"><input id="dataPreenchimento" disabled type="date" /></td></tr>
+    </table>
+
+    <!-- PROFISSIONAIS -->
+    <div class="section-title">2. RELAÇÃO DOS PROFISSIONAIS</div>
+    <div class="profissionais">
+        <table>
+            <thead><tr><th>Nº</th><th>Nome</th><th>CPF</th><th>CBO</th><th>Formação</th><th>Conselho</th><th>Registro</th><th>UF</th><th>Cargo</th><th>Vínculo</th><th>C.H.</th><th>Setor</th></tr></thead>
+            <tbody id="tbodyProfissionais"><tr><td colspan="12" class="sem-dados"><i class="fas fa-ghost"></i>Selecione uma unidade e clique em "Carregar".</td></tr></tbody>
+        </table>
+    </div>
+
+</div>
+
+<script>
+(function() {
+    'use strict';
+
+    // ============================================================
+    // SUPABASE CONFIG
+    // ============================================================
+    const SUPABASE_URL = 'https://cptkatdswfyycsgedcte.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNwdGthdGRzd2Z5eWNzZ2VkY3RlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIxNDQ2MTcsImV4cCI6MjA5NzcyMDYxN30.MPxI1t1gyr1dpnqG-w_oM8FagnewLyxnojs9gZyIpfw';
+
+    let sbClient = null;
+    let todasUnidades = [];
+    let todosProfissionais = [];
+    let chartMensal = null, chartSemanal = null;
+
+    // ============================================================
+    // DIAGNÓSTICO
+    // ============================================================
+    function setPasso(el, status, msg) {
+        el.className = 'passo ' + status;
+        const icone = el.querySelector('i');
+        if (status === 'rodando') icone.className = 'fas fa-spinner fa-spin';
+        else if (status === 'ok') icone.className = 'fas fa-check-circle';
+        else if (status === 'erro') icone.className = 'fas fa-times-circle';
+        if (msg) { const t = el.childNodes[2]; if (t) t.textContent = ' ' + msg; }
+    }
+
+    function setStatus(online, msg) {
+        document.getElementById('indicadorStatus').className = 'indicador ' + (online ? 'online' : 'offline');
+        document.getElementById('textoStatus').textContent = msg || (online ? 'Conectado' : 'Offline');
+    }
+
+    async function executarDiagnostico() {
+        setPasso(document.getElementById('passo1'), 'rodando', 'Criando cliente...');
+        setPasso(document.getElementById('passo2'), 'rodando', '...');
+        setPasso(document.getElementById('passo3'), 'rodando', '...');
+
+        try {
+            const lib = (typeof supabase !== 'undefined') ? supabase : window.supabase;
+            if (!lib) throw new Error('Biblioteca Supabase não carregada.');
+            sbClient = lib.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            setPasso(document.getElementById('passo1'), 'ok', 'Cliente criado');
+
+            const { data, error } = await sbClient.from('unidades_saude').select('cnes').limit(1);
+            if (error) throw error;
+            setPasso(document.getElementById('passo2'), 'ok', 'Tabela acessível');
+
+            await carregarDados();
+            setPasso(document.getElementById('passo3'), 'ok', 'Dados carregados (' + todosProfissionais.length + ' profissionais)');
+            setStatus(true, 'Conectado');
+        } catch (e) {
+            setPasso(document.getElementById('passo1'), 'erro', e.message);
+            setStatus(false, 'Erro: ' + e.message);
+            alert('❌ ' + e.message);
+        }
+    }
+
+    // ============================================================
+    // CARREGAR DADOS (USANDO "cnes" COMO CHAVE)
+    // ============================================================
+    async function carregarDados() {
+        if (!sbClient) {
+            const lib = (typeof supabase !== 'undefined') ? supabase : window.supabase;
+            if (!lib) throw new Error('Biblioteca não carregada');
+            sbClient = lib.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        }
+
+        // Unidades - usando "cnes" como identificador
+        const { data: unid, error: e1 } = await sbClient
+            .from('unidades_saude')
+            .select('cnes, nome_unidade, uf, municipio')
+            .order('nome_unidade');
+        if (e1) throw e1;
+        todasUnidades = unid || [];
+
+        // Profissionais
+        const { data: profs, error: e2 } = await sbClient
+            .from('profissionais')
+            .select('*')
+            .order('created_at', { ascending: false });
+        if (e2) throw e2;
+        todosProfissionais = profs || [];
+
+        // Atualizar select de unidades
+        const select = document.getElementById('selecionarUnidade');
+        select.innerHTML = '<option value="">-- Selecione --</option>';
+        todasUnidades.forEach(u => {
+            const opt = document.createElement('option');
+            opt.value = u.cnes;
+            opt.textContent = (u.cnes ? u.cnes + ' - ' : '') + u.nome_unidade;
+            select.appendChild(opt);
+        });
+
+        atualizarDashboard();
+    }
+
+    // ============================================================
+    // DASHBOARD
+    // ============================================================
+    function atualizarDashboard() {
+        const profs = todosProfissionais;
+        document.getElementById('totalProfissionais').textContent = profs.length;
+
+        // Unidades com profissionais (usa unidade_id que é o CNES)
+        const unidSet = new Set(profs.map(p => p.unidade_id).filter(Boolean));
+        document.getElementById('totalUnidades').textContent = unidSet.size;
+
+        const medicos = profs.filter(p => p.cbo && p.cbo.startsWith('225'));
+        document.getElementById('totalMedicos').textContent = medicos.length;
+        const enfermeiros = profs.filter(p => p.cbo === '2235-05');
+        document.getElementById('totalEnfermeiros').textContent = enfermeiros.length;
+        const acs = profs.filter(p => p.cbo === '5151-05');
+        document.getElementById('totalACS').textContent = acs.length;
+        const dentistas = profs.filter(p => p.cbo && p.cbo.startsWith('2232'));
+        document.getElementById('totalDentistas').textContent = dentistas.length;
+        const cbos = new Set(profs.map(p => p.cbo).filter(Boolean));
+        document.getElementById('totalCBOs').textContent = cbos.size;
+
+        const hoje = new Date().toISOString().split('T')[0];
+        const atualizadosHoje = profs.filter(p => p.updated_at && p.updated_at.startsWith(hoje));
+        document.getElementById('totalHoje').textContent = atualizadosHoje.length;
+
+        // --- Gráfico de movimentação mensal ---
+        const meses = {};
+        profs.forEach(p => {
+            if (p.updated_at) {
+                const mes = p.updated_at.substring(0,7);
+                meses[mes] = (meses[mes] || 0) + 1;
+            }
+        });
+        const sortedMeses = Object.keys(meses).sort();
+        const labelsMeses = sortedMeses.map(m => {
+            const [ano, mes] = m.split('-');
+            const nomes = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+            return nomes[parseInt(mes)-1] + '/' + ano.slice(2);
+        });
+        const dataMeses = sortedMeses.map(m => meses[m]);
+
+        const ctxMensal = document.getElementById('chartMovimentoMensal').getContext('2d');
+        if (chartMensal) chartMensal.destroy();
+        chartMensal = new Chart(ctxMensal, {
+            type: 'bar',
+            data: {
+                labels: labelsMeses,
+                datasets: [{ label: 'Movimentações', data: dataMeses, backgroundColor: '#003c7d' }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+            }
+        });
+
+        // --- Gráfico de movimentação semanal ---
+        const dias = {};
+        const hojeDate = new Date();
+        for (let i = 6; i >= 0; i--) {
+            const d = new Date(hojeDate);
+            d.setDate(d.getDate() - i);
+            const key = d.toISOString().split('T')[0];
+            dias[key] = 0;
+        }
+        profs.forEach(p => {
+            if (p.updated_at) {
+                const data = p.updated_at.substring(0,10);
+                if (dias.hasOwnProperty(data)) dias[data]++;
+            }
+        });
+        const labelsDias = Object.keys(dias).map(d => {
+            const dt = new Date(d);
+            return dt.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit' });
+        });
+        const dataDias = Object.values(dias);
+
+        const ctxSemanal = document.getElementById('chartMovimentoSemanal').getContext('2d');
+        if (chartSemanal) chartSemanal.destroy();
+        chartSemanal = new Chart(ctxSemanal, {
+            type: 'line',
+            data: {
+                labels: labelsDias,
+                datasets: [{ label: 'Movimentações', data: dataDias, borderColor: '#fd7e14', backgroundColor: 'rgba(253,126,20,0.1)', fill: true, tension: 0.3 }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+            }
+        });
+
+        // --- Ranking de profissionais por unidade ---
+        const rankProf = {};
+        profs.forEach(p => { if (p.unidade_id) rankProf[p.unidade_id] = (rankProf[p.unidade_id] || 0) + 1; });
+        const sortedProf = Object.entries(rankProf).sort((a,b) => b[1]-a[1]).slice(0,10);
+        const listProf = document.getElementById('rankingProfissionais');
+        listProf.innerHTML = '';
+        if (sortedProf.length === 0) {
+            listProf.innerHTML = '<li class="list-group-item text-center text-muted">Nenhum dado</li>';
+        } else {
+            sortedProf.forEach(([cnes, count]) => {
+                const un = todasUnidades.find(u => u.cnes === cnes);
+                const nome = un ? un.nome_unidade : 'N/I (' + cnes + ')';
+                const li = document.createElement('li');
+                li.className = 'list-group-item d-flex justify-content-between align-items-center';
+                li.innerHTML = `<span>${nome}</span><span class="badge bg-primary">${count}</span>`;
+                listProf.appendChild(li);
+            });
+        }
+
+        // --- Ranking de movimentação ---
+        const rankMov = {};
+        profs.forEach(p => {
+            if (p.unidade_id && p.updated_at) {
+                rankMov[p.unidade_id] = (rankMov[p.unidade_id] || 0) + 1;
+            }
+        });
+        const sortedMov = Object.entries(rankMov).sort((a,b) => b[1]-a[1]).slice(0,10);
+        const listMov = document.getElementById('rankingMovimentacao');
+        listMov.innerHTML = '';
+        if (sortedMov.length === 0) {
+            listMov.innerHTML = '<li class="list-group-item text-center text-muted">Nenhuma movimentação</li>';
+        } else {
+            sortedMov.forEach(([cnes, count]) => {
+                const un = todasUnidades.find(u => u.cnes === cnes);
+                const nome = un ? un.nome_unidade : 'N/I (' + cnes + ')';
+                const li = document.createElement('li');
+                li.className = 'list-group-item d-flex justify-content-between align-items-center';
+                li.innerHTML = `<span>${nome}</span><span class="badge bg-warning text-dark">${count}</span>`;
+                listMov.appendChild(li);
+            });
+        }
+    }
+
+    // ============================================================
+    // CARREGAR UNIDADE
+    // ============================================================
+    async function carregarUnidade() {
+        const cnes = document.getElementById('selecionarUnidade').value;
+        if (!cnes) { alert('Selecione uma unidade.'); return; }
+
+        const tbody = document.getElementById('tbodyProfissionais');
+        tbody.innerHTML = '<tr><td colspan="12" class="sem-dados">Carregando...</td></tr>';
+
+        try {
+            const { data: unidade, error: e1 } = await sbClient
+                .from('unidades_saude')
+                .select('*')
+                .eq('cnes', cnes)
+                .maybeSingle();
+            if (e1) throw e1;
+            if (!unidade) {
+                tbody.innerHTML = '<tr><td colspan="12" class="sem-dados">Unidade não encontrada.</td></tr>';
+                return;
+            }
+
+            document.getElementById('cnes').value = unidade.cnes || '';
+            document.getElementById('nomeUnidade').value = unidade.nome_unidade || '';
+            document.getElementById('uf').value = unidade.uf || '';
+            document.getElementById('tipoUnidade').value = unidade.tipo_unidade || '';
+            document.getElementById('municipio').value = unidade.municipio || '';
+            document.getElementById('endereco').value = unidade.endereco || '';
+            document.getElementById('telefone').value = unidade.telefone || '';
+            document.getElementById('responsavel').value = unidade.responsavel || '';
+            document.getElementById('cargoResponsavel').value = unidade.cargo_responsavel || '';
+            document.getElementById('dataEmissao').value = unidade.data_emissao || '';
+            document.getElementById('dataPreenchimento').value = unidade.data_preenchimento || '';
+
+            const { data: profs, error: e2 } = await sbClient
+                .from('profissionais')
+                .select('*')
+                .eq('unidade_id', cnes)
+                .order('created_at', { ascending: true });
+            if (e2) throw e2;
+
+            tbody.innerHTML = '';
+            if (profs && profs.length > 0) {
+                profs.forEach((p, i) => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${i+1}</td>
+                        <td><input value="${p.nome_completo||''}" disabled></td>
+                        <td><input value="${p.cpf||''}" disabled></td>
+                        <td><input value="${p.cbo||''}" disabled></td>
+                        <td><input value="${p.formacao||''}" disabled></td>
+                        <td><input value="${p.conselho||''}" disabled></td>
+                        <td><input value="${p.numero_registro||''}" disabled></td>
+                        <td><input value="${p.uf_conselho||''}" disabled></td>
+                        <td><input value="${p.cargo_funcao||''}" disabled></td>
+                        <td><input value="${p.tipo_vinculo||''}" disabled></td>
+                        <td><input value="${p.carga_horaria||''}" disabled></td>
+                        <td><input value="${p.setor_equipe||''}" disabled></td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } else {
+                tbody.innerHTML = '<tr><td colspan="12" class="sem-dados"><i class="fas fa-ghost"></i>Nenhum profissional cadastrado.</td></tr>';
+            }
+        } catch (e) {
+            console.error(e);
+            tbody.innerHTML = `<tr><td colspan="12" class="sem-dados" style="color:red;">Erro: ${e.message}</td></tr>`;
+        }
+    }
+
+    // ============================================================
+    // INICIALIZAÇÃO
+    // ============================================================
+    window.onload = function() {
+        document.getElementById('dataEmissao').value = new Date().toISOString().split('T')[0];
+        executarDiagnostico();
+    };
+
+    window.executarDiagnostico = executarDiagnostico;
+    window.carregarUnidade = carregarUnidade;
+
+})();
+</script>
+
+</body>
+</html>
