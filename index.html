@@ -61,6 +61,11 @@
         .btn-pdf { background:#dc3545; }
         .btn-pdf:hover { background:#c82333 !important; }
 
+        /* ===== CAMPO DE BUSCA ===== */
+        .busca-container { padding:10px 15px; background:#f9f9f9; border-bottom:1px solid #ccc; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+        .busca-container input { flex:1 1 300px; padding:8px 12px; border:1px solid #ccc; border-radius:4px; font-size:14px; background:white; }
+        .busca-container .total-encontrados { font-size:14px; color:#6c757d; }
+
         /* ===== TABELAS ===== */
         .section-title { background:#003c7d; color:#fff; padding:5px 15px; font-weight:bold; }
         table { width:100%; border-collapse:collapse; }
@@ -88,7 +93,7 @@
         }
 
         @media print {
-            .seletor-unidade, .status-conexao, .diagnostico, .btn-pdf { display:none !important; }
+            .seletor-unidade, .status-conexao, .diagnostico, .btn-pdf, .busca-container { display:none !important; }
             .dashboard { display:block !important; }
         }
     </style>
@@ -159,20 +164,26 @@
     <div class="seletor-unidade">
         <label for="selecionarUnidade">Unidade:</label>
         <select id="selecionarUnidade">
-            <option value="">-- Selecione --</option>
+            <option value="__todos__">-- Todos os profissionais --</option>
         </select>
-        <button id="btnCarregar" onclick="carregarUnidade()"><i class="fas fa-search"></i> Carregar</button>
+        <button id="btnCarregar" onclick="aplicarFiltroUnidade()"><i class="fas fa-search"></i> Filtrar</button>
         <button class="btn-pdf" onclick="window.print()"><i class="fas fa-file-pdf"></i> Exportar PDF</button>
     </div>
 
-    <!-- DADOS DA UNIDADE -->
+    <!-- BARRA DE BUSCA GLOBAL -->
+    <div class="busca-container">
+        <input type="text" id="buscaProfissionais" placeholder="🔍 Buscar por nome, CPF, CBO, formação, conselho, registro, UF, cargo, vínculo ou setor..." oninput="aplicarBuscaGlobal()" />
+        <span class="total-encontrados" id="totalEncontrados">0 encontrados</span>
+    </div>
+
+    <!-- DADOS DA UNIDADE (exibe os dados da unidade selecionada ou mensagem global) -->
     <div class="section-title">1. DADOS DA UNIDADE</div>
     <table>
-        <tr><td data-label="CNES"><input id="cnes" disabled /></td><td data-label="Nome"><input id="nomeUnidade" disabled /></td><td data-label="UF"><input id="uf" disabled /></td></tr>
-        <tr><td data-label="Tipo"><select id="tipoUnidade" disabled><option value="">Selecione</option></select></td><td data-label="Município"><input id="municipio" disabled /></td><td></td></tr>
-        <tr><td colspan="3" data-label="Endereço"><input id="endereco" disabled style="width:100%;" /></td></tr>
-        <tr><td data-label="Telefone"><input id="telefone" disabled /></td><td colspan="2" data-label="Responsável"><input id="responsavel" disabled /></td></tr>
-        <tr><td data-label="Cargo"><input id="cargoResponsavel" disabled /></td><td colspan="2" data-label="Data Preenchimento"><input id="dataPreenchimento" disabled type="date" /></td></tr>
+        <tr><td data-label="CNES"><input id="cnes" disabled placeholder="--" /></td><td data-label="Nome"><input id="nomeUnidade" disabled placeholder="--" /></td><td data-label="UF"><input id="uf" disabled placeholder="--" /></td></tr>
+        <tr><td data-label="Tipo"><select id="tipoUnidade" disabled><option value="">--</option></select></td><td data-label="Município"><input id="municipio" disabled placeholder="--" /></td><td></td></tr>
+        <tr><td colspan="3" data-label="Endereço"><input id="endereco" disabled placeholder="--" style="width:100%;" /></td></tr>
+        <tr><td data-label="Telefone"><input id="telefone" disabled placeholder="--" /></td><td colspan="2" data-label="Responsável"><input id="responsavel" disabled placeholder="--" /></td></tr>
+        <tr><td data-label="Cargo"><input id="cargoResponsavel" disabled placeholder="--" /></td><td colspan="2" data-label="Data Preenchimento"><input id="dataPreenchimento" disabled type="date" placeholder="--" /></td></tr>
     </table>
 
     <!-- PROFISSIONAIS -->
@@ -180,7 +191,7 @@
     <div class="profissionais">
         <table>
             <thead><tr><th>Nº</th><th>Nome</th><th>CPF</th><th>CBO</th><th>Formação</th><th>Conselho</th><th>Registro</th><th>UF</th><th>Cargo</th><th>Vínculo</th><th>C.H.</th><th>Setor</th></tr></thead>
-            <tbody id="tbodyProfissionais"><tr><td colspan="12" class="sem-dados"><i class="fas fa-ghost"></i>Selecione uma unidade e clique em "Carregar".</td></tr></tbody>
+            <tbody id="tbodyProfissionais"><tr><td colspan="12" class="sem-dados"><i class="fas fa-ghost"></i>Carregando...</td></tr></tbody>
         </table>
     </div>
 
@@ -198,7 +209,9 @@
 
     let sbClient = null;
     let todasUnidades = [];
-    let todosProfissionais = [];
+    let todosProfissionais = [];        // Lista completa
+    let profissionaisFiltrados = [];   // Lista após filtro de unidade ou busca
+    let unidadeSelecionada = null;     // CNES da unidade selecionada (null = todas)
     let chartMensal = null, chartSemanal = null;
 
     // ============================================================
@@ -229,9 +242,9 @@
             sbClient = lib.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
             setPasso(document.getElementById('passo1'), 'ok', 'Cliente criado');
 
-            const { data, error } = await sbClient.from('unidades_saude').select('cnes').limit(1);
-            if (error) throw error;
-            setPasso(document.getElementById('passo2'), 'ok', 'Tabela acessível');
+            const { data: unid, error: e1 } = await sbClient.from('unidades_saude').select('cnes').limit(1);
+            if (e1) throw new Error('Erro na tabela unidades_saude: ' + e1.message);
+            setPasso(document.getElementById('passo2'), 'ok', 'Tabelas acessíveis');
 
             await carregarDados();
             setPasso(document.getElementById('passo3'), 'ok', 'Dados carregados (' + todosProfissionais.length + ' profissionais)');
@@ -244,7 +257,7 @@
     }
 
     // ============================================================
-    // CARREGAR DADOS (USANDO "cnes" COMO CHAVE)
+    // CARREGAR DADOS
     // ============================================================
     async function carregarDados() {
         if (!sbClient) {
@@ -253,7 +266,7 @@
             sbClient = lib.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         }
 
-        // Unidades - usando "cnes" como identificador
+        // Unidades
         const { data: unid, error: e1 } = await sbClient
             .from('unidades_saude')
             .select('cnes, nome_unidade, uf, municipio')
@@ -271,7 +284,7 @@
 
         // Atualizar select de unidades
         const select = document.getElementById('selecionarUnidade');
-        select.innerHTML = '<option value="">-- Selecione --</option>';
+        select.innerHTML = '<option value="__todos__">-- Todos os profissionais --</option>';
         todasUnidades.forEach(u => {
             const opt = document.createElement('option');
             opt.value = u.cnes;
@@ -279,7 +292,12 @@
             select.appendChild(opt);
         });
 
+        // Inicializa com todos
+        unidadeSelecionada = null;
+        profissionaisFiltrados = [...todosProfissionais];
         atualizarDashboard();
+        renderizarTabelaProfissionais(profissionaisFiltrados);
+        limparDadosUnidade();
     }
 
     // ============================================================
@@ -289,8 +307,7 @@
         const profs = todosProfissionais;
         document.getElementById('totalProfissionais').textContent = profs.length;
 
-        // Unidades com profissionais (usa unidade_id que é o CNES)
-        const unidSet = new Set(profs.map(p => p.unidade_id).filter(Boolean));
+        const unidSet = new Set(profs.map(p => p.cnes).filter(Boolean));
         document.getElementById('totalUnidades').textContent = unidSet.size;
 
         const medicos = profs.filter(p => p.cbo && p.cbo.startsWith('225'));
@@ -308,7 +325,7 @@
         const atualizadosHoje = profs.filter(p => p.updated_at && p.updated_at.startsWith(hoje));
         document.getElementById('totalHoje').textContent = atualizadosHoje.length;
 
-        // --- Gráfico de movimentação mensal ---
+        // Gráficos...
         const meses = {};
         profs.forEach(p => {
             if (p.updated_at) {
@@ -340,7 +357,6 @@
             }
         });
 
-        // --- Gráfico de movimentação semanal ---
         const dias = {};
         const hojeDate = new Date();
         for (let i = 6; i >= 0; i--) {
@@ -377,9 +393,9 @@
             }
         });
 
-        // --- Ranking de profissionais por unidade ---
+        // Rankings
         const rankProf = {};
-        profs.forEach(p => { if (p.unidade_id) rankProf[p.unidade_id] = (rankProf[p.unidade_id] || 0) + 1; });
+        profs.forEach(p => { if (p.cnes) rankProf[p.cnes] = (rankProf[p.cnes] || 0) + 1; });
         const sortedProf = Object.entries(rankProf).sort((a,b) => b[1]-a[1]).slice(0,10);
         const listProf = document.getElementById('rankingProfissionais');
         listProf.innerHTML = '';
@@ -396,11 +412,10 @@
             });
         }
 
-        // --- Ranking de movimentação ---
         const rankMov = {};
         profs.forEach(p => {
-            if (p.unidade_id && p.updated_at) {
-                rankMov[p.unidade_id] = (rankMov[p.unidade_id] || 0) + 1;
+            if (p.cnes && p.updated_at) {
+                rankMov[p.cnes] = (rankMov[p.cnes] || 0) + 1;
             }
         });
         const sortedMov = Object.entries(rankMov).sort((a,b) => b[1]-a[1]).slice(0,10);
@@ -421,73 +436,111 @@
     }
 
     // ============================================================
-    // CARREGAR UNIDADE
+    // FILTRO POR UNIDADE
     // ============================================================
-    async function carregarUnidade() {
+    async function aplicarFiltroUnidade() {
         const cnes = document.getElementById('selecionarUnidade').value;
-        if (!cnes) { alert('Selecione uma unidade.'); return; }
-
-        const tbody = document.getElementById('tbodyProfissionais');
-        tbody.innerHTML = '<tr><td colspan="12" class="sem-dados">Carregando...</td></tr>';
-
-        try {
-            const { data: unidade, error: e1 } = await sbClient
-                .from('unidades_saude')
-                .select('*')
-                .eq('cnes', cnes)
-                .maybeSingle();
-            if (e1) throw e1;
-            if (!unidade) {
-                tbody.innerHTML = '<tr><td colspan="12" class="sem-dados">Unidade não encontrada.</td></tr>';
-                return;
+        if (cnes === '__todos__') {
+            unidadeSelecionada = null;
+            profissionaisFiltrados = [...todosProfissionais];
+            limparDadosUnidade();
+        } else {
+            unidadeSelecionada = cnes;
+            // Buscar dados da unidade
+            try {
+                const { data: unidade, error: e1 } = await sbClient
+                    .from('unidades_saude')
+                    .select('*')
+                    .eq('cnes', cnes)
+                    .maybeSingle();
+                if (e1) throw e1;
+                if (unidade) {
+                    document.getElementById('cnes').value = unidade.cnes || '';
+                    document.getElementById('nomeUnidade').value = unidade.nome_unidade || '';
+                    document.getElementById('uf').value = unidade.uf || '';
+                    document.getElementById('tipoUnidade').value = unidade.tipo_unidade || '';
+                    document.getElementById('municipio').value = unidade.municipio || '';
+                    document.getElementById('endereco').value = unidade.endereco || '';
+                    document.getElementById('telefone').value = unidade.telefone || '';
+                    document.getElementById('responsavel').value = unidade.responsavel || '';
+                    document.getElementById('cargoResponsavel').value = unidade.cargo_responsavel || '';
+                    document.getElementById('dataEmissao').value = unidade.data_emissao || '';
+                    document.getElementById('dataPreenchimento').value = unidade.data_preenchimento || '';
+                }
+            } catch (e) {
+                console.error('Erro ao carregar unidade:', e);
+                limparDadosUnidade();
             }
 
-            document.getElementById('cnes').value = unidade.cnes || '';
-            document.getElementById('nomeUnidade').value = unidade.nome_unidade || '';
-            document.getElementById('uf').value = unidade.uf || '';
-            document.getElementById('tipoUnidade').value = unidade.tipo_unidade || '';
-            document.getElementById('municipio').value = unidade.municipio || '';
-            document.getElementById('endereco').value = unidade.endereco || '';
-            document.getElementById('telefone').value = unidade.telefone || '';
-            document.getElementById('responsavel').value = unidade.responsavel || '';
-            document.getElementById('cargoResponsavel').value = unidade.cargo_responsavel || '';
-            document.getElementById('dataEmissao').value = unidade.data_emissao || '';
-            document.getElementById('dataPreenchimento').value = unidade.data_preenchimento || '';
-
-            const { data: profs, error: e2 } = await sbClient
-                .from('profissionais')
-                .select('*')
-                .eq('unidade_id', cnes)
-                .order('created_at', { ascending: true });
-            if (e2) throw e2;
-
-            tbody.innerHTML = '';
-            if (profs && profs.length > 0) {
-                profs.forEach((p, i) => {
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td>${i+1}</td>
-                        <td><input value="${p.nome_completo||''}" disabled></td>
-                        <td><input value="${p.cpf||''}" disabled></td>
-                        <td><input value="${p.cbo||''}" disabled></td>
-                        <td><input value="${p.formacao||''}" disabled></td>
-                        <td><input value="${p.conselho||''}" disabled></td>
-                        <td><input value="${p.numero_registro||''}" disabled></td>
-                        <td><input value="${p.uf_conselho||''}" disabled></td>
-                        <td><input value="${p.cargo_funcao||''}" disabled></td>
-                        <td><input value="${p.tipo_vinculo||''}" disabled></td>
-                        <td><input value="${p.carga_horaria||''}" disabled></td>
-                        <td><input value="${p.setor_equipe||''}" disabled></td>
-                    `;
-                    tbody.appendChild(tr);
-                });
-            } else {
-                tbody.innerHTML = '<tr><td colspan="12" class="sem-dados"><i class="fas fa-ghost"></i>Nenhum profissional cadastrado.</td></tr>';
-            }
-        } catch (e) {
-            console.error(e);
-            tbody.innerHTML = `<tr><td colspan="12" class="sem-dados" style="color:red;">Erro: ${e.message}</td></tr>`;
+            profissionaisFiltrados = todosProfissionais.filter(p => p.cnes === cnes);
         }
+        // Aplica a busca global sobre a lista filtrada
+        aplicarBuscaGlobal();
+        // Atualiza a tabela
+        renderizarTabelaProfissionais(profissionaisFiltrados);
+    }
+
+    function limparDadosUnidade() {
+        document.getElementById('cnes').value = '';
+        document.getElementById('nomeUnidade').value = '';
+        document.getElementById('uf').value = '';
+        document.getElementById('tipoUnidade').value = '';
+        document.getElementById('municipio').value = '';
+        document.getElementById('endereco').value = '';
+        document.getElementById('telefone').value = '';
+        document.getElementById('responsavel').value = '';
+        document.getElementById('cargoResponsavel').value = '';
+        document.getElementById('dataEmissao').value = '';
+        document.getElementById('dataPreenchimento').value = '';
+    }
+
+    // ============================================================
+    // BUSCA GLOBAL (filtra a lista atual)
+    // ============================================================
+    function aplicarBuscaGlobal() {
+        const busca = document.getElementById('buscaProfissionais').value.toLowerCase().trim();
+        let lista = profissionaisFiltrados; // já filtrada por unidade
+
+        if (busca) {
+            lista = lista.filter(p => {
+                const texto = Object.values(p).join(' ').toLowerCase();
+                return texto.includes(busca);
+            });
+        }
+        renderizarTabelaProfissionais(lista);
+    }
+
+    // ============================================================
+    // RENDERIZAR TABELA
+    // ============================================================
+    function renderizarTabelaProfissionais(lista) {
+        const tbody = document.getElementById('tbodyProfissionais');
+        tbody.innerHTML = '';
+        if (!lista || lista.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="12" class="sem-dados"><i class="fas fa-ghost"></i>Nenhum profissional encontrado.</td></tr>';
+            document.getElementById('totalEncontrados').textContent = '0 encontrados';
+            return;
+        }
+
+        lista.forEach((p, i) => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${i+1}</td>
+                <td><input value="${p.nome_profissional || ''}" disabled></td>
+                <td><input value="${p.cpf || ''}" disabled></td>
+                <td><input value="${p.cbo || ''}" disabled></td>
+                <td><input value="${p.formacao || ''}" disabled></td>
+                <td><input value="${p.conselho || ''}" disabled></td>
+                <td><input value="${p.registro || ''}" disabled></td>
+                <td><input value="${p.uf_conselho || ''}" disabled></td>
+                <td><input value="${p.cargo_funcao || ''}" disabled></td>
+                <td><input value="${p.tipo_vinculo || ''}" disabled></td>
+                <td><input value="${p.carga_horaria || ''}" disabled></td>
+                <td><input value="${p.setor_equipe || ''}" disabled></td>
+            `;
+            tbody.appendChild(tr);
+        });
+        document.getElementById('totalEncontrados').textContent = lista.length + ' encontrados';
     }
 
     // ============================================================
@@ -498,8 +551,10 @@
         executarDiagnostico();
     };
 
+    // Expor funções globalmente
     window.executarDiagnostico = executarDiagnostico;
-    window.carregarUnidade = carregarUnidade;
+    window.aplicarFiltroUnidade = aplicarFiltroUnidade;
+    window.aplicarBuscaGlobal = aplicarBuscaGlobal;
 
 })();
 </script>
