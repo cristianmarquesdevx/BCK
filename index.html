@@ -182,9 +182,9 @@
         <button class="btn-pdf" onclick="window.print()"><i class="fas fa-file-pdf"></i> Exportar PDF</button>
     </div>
 
-    <!-- BARRA DE BUSCA GLOBAL -->
+    <!-- BARRA DE BUSCA GLOBAL (AGORA COM CONSULTA AO BANCO) -->
     <div class="busca-container">
-        <input type="text" id="buscaProfissionais" placeholder="🔍 Buscar por nome, CPF, CBO, formação, conselho, registro, UF, cargo, vínculo ou setor..." oninput="aplicarBuscaGlobal()" />
+        <input type="text" id="buscaProfissionais" placeholder="🔍 Buscar por nome ou CPF (consulta em toda a base)..." oninput="aplicarBuscaGlobal()" />
         <span class="total-encontrados" id="totalEncontrados">0 encontrados</span>
     </div>
 
@@ -198,11 +198,11 @@
         <tr><td data-label="Cargo"><input id="cargoResponsavel" disabled placeholder="--" /></td><td colspan="2" data-label="Data Preenchimento"><input id="dataPreenchimento" disabled type="date" placeholder="--" /></td></tr>
     </table>
 
-    <!-- PROFISSIONAIS -->
+    <!-- PROFISSIONAIS (COM UNIDADE E SEM FORMAÇÃO) -->
     <div class="section-title">2. RELAÇÃO DOS PROFISSIONAIS</div>
     <div class="profissionais">
         <table>
-            <thead><tr><th>Nº</th><th>Nome</th><th>CPF</th><th>CBO</th><th>Formação</th><th>Conselho</th><th>Registro</th><th>UF</th><th>Cargo</th><th>Vínculo</th><th>C.H.</th><th>Setor</th></tr></thead>
+            <thead><tr><th>Nº</th><th>Unidade</th><th>Nome</th><th>CPF</th><th>CBO</th><th>Conselho</th><th>Registro</th><th>UF</th><th>Cargo</th><th>Vínculo</th><th>C.H.</th><th>Setor</th></tr></thead>
             <tbody id="tbodyProfissionais"><tr><td colspan="12" class="sem-dados"><i class="fas fa-ghost"></i>Carregando...</td></tr></tbody>
         </table>
     </div>
@@ -383,11 +383,6 @@
         } else {
             // Mais de uma unidade encontrada: mantém "Todas as unidades" selecionado
             select.value = '__todos__';
-            // Aplica filtro para mostrar todos (ou mantém o atual? Melhor mostrar todos)
-            // Para não perder a lista filtrada, podemos aplicar filtro com "Todas as unidades" mas os profissionais mostrados serão todos.
-            // Porém, se o select está com "Todas as unidades", o filtro deve mostrar todos.
-            // Como o select ainda está com "Todas as unidades" (padrão), chamamos aplicarFiltroUnidade()
-            // Mas ele vai usar o valor do select, que é "__todos__", então mostrará todos.
             aplicarFiltroUnidade();
         }
     }
@@ -588,8 +583,17 @@
             }
             profissionaisFiltrados = todosProfissionais.filter(p => p.cnes === cnes);
         }
-        aplicarBuscaGlobal();
-        renderizarTabelaProfissionais(profissionaisFiltrados);
+        // Se a busca global estiver vazia, mostra a lista filtrada; senão, mantém o resultado da busca
+        const buscaGlobal = document.getElementById('buscaProfissionais').value.trim();
+        if (buscaGlobal === '') {
+            renderizarTabelaProfissionais(profissionaisFiltrados);
+        } else {
+            // Se houver busca, ela já foi aplicada; não sobrescrever
+            aplicarBuscaGlobal();
+        }
+        // Atualiza contador
+        document.getElementById('totalEncontrados').textContent = 
+            (document.getElementById('tbodyProfissionais').querySelectorAll('tr').length - 1) + ' encontrados';
     }
 
     function limparDadosUnidade() {
@@ -607,39 +611,64 @@
     }
 
     // ============================================================
-    // BUSCA GLOBAL
+    // BUSCA GLOBAL (CONSULTA DIRETA AO BANCO)
     // ============================================================
-    function aplicarBuscaGlobal() {
-        const busca = document.getElementById('buscaProfissionais').value.toLowerCase().trim();
-        let lista = profissionaisFiltrados;
-        if (busca) {
-            lista = lista.filter(p => {
-                const texto = Object.values(p).join(' ').toLowerCase();
-                return texto.includes(busca);
-            });
+    async function aplicarBuscaGlobal() {
+        const input = document.getElementById('buscaProfissionais');
+        const termo = input.value.trim();
+
+        if (termo === '') {
+            // Se vazio, volta a exibir a lista filtrada pela unidade (ou todas)
+            renderizarTabelaProfissionais(profissionaisFiltrados);
+            document.getElementById('totalEncontrados').textContent = 
+                (document.getElementById('tbodyProfissionais').querySelectorAll('tr').length - 1) + ' encontrados';
+            return;
         }
-        renderizarTabelaProfissionais(lista);
+
+        // Busca no banco (tabela profissionais) filtrando por nome ou CPF
+        try {
+            const { data: resultados, error } = await sbClient
+                .from('profissionais')
+                .select('*')
+                .or(`nome_profissional.ilike.%${termo}%,cpf.ilike.%${termo}%`)
+                .order('nome_profissional');
+
+            if (error) throw error;
+
+            const lista = resultados || [];
+            renderizarTabelaProfissionais(lista);
+            document.getElementById('totalEncontrados').textContent = 
+                lista.length + ' encontrados (busca no banco)';
+        } catch (e) {
+            console.error('Erro na busca global:', e);
+            document.getElementById('tbodyProfissionais').innerHTML = 
+                '<tr><td colspan="12" class="sem-dados"><i class="fas fa-exclamation-triangle"></i>Erro ao buscar: ' + e.message + '</td></tr>';
+            document.getElementById('totalEncontrados').textContent = '0 encontrados';
+        }
     }
 
     // ============================================================
-    // RENDERIZAR TABELA
+    // RENDERIZAR TABELA (COM UNIDADE E SEM FORMAÇÃO)
     // ============================================================
     function renderizarTabelaProfissionais(lista) {
         const tbody = document.getElementById('tbodyProfissionais');
         tbody.innerHTML = '';
         if (!lista || lista.length === 0) {
             tbody.innerHTML = '<tr><td colspan="12" class="sem-dados"><i class="fas fa-ghost"></i>Nenhum profissional encontrado.</td></tr>';
-            document.getElementById('totalEncontrados').textContent = '0 encontrados';
             return;
         }
         lista.forEach((p, i) => {
+            // Busca o nome da unidade
+            const unidade = todasUnidades.find(u => u.cnes === p.cnes);
+            const nomeUnidade = unidade ? unidade.nome_unidade : (p.cnes || 'N/I');
+
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td>${i+1}</td>
+                <td><input value="${nomeUnidade}" disabled></td>
                 <td><input value="${p.nome_profissional || ''}" disabled></td>
                 <td><input value="${p.cpf || ''}" disabled></td>
                 <td><input value="${p.cbo || ''}" disabled></td>
-                <td><input value="${p.formacao || ''}" disabled></td>
                 <td><input value="${p.conselho || ''}" disabled></td>
                 <td><input value="${p.registro || ''}" disabled></td>
                 <td><input value="${p.uf_conselho || ''}" disabled></td>
@@ -650,7 +679,7 @@
             `;
             tbody.appendChild(tr);
         });
-        document.getElementById('totalEncontrados').textContent = lista.length + ' encontrados';
+        // Atualiza contador (já feito na chamada)
     }
 
     // ============================================================
