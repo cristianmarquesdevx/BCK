@@ -52,6 +52,7 @@
         .grafico-container { background:#fff; border-radius:6px; padding:15px; border:1px solid #ddd; height:260px; }
         .ranking-list { max-height:260px; overflow-y:auto; background:#fff; border-radius:6px; padding:5px; border:1px solid #ddd; }
         .ranking-list .list-group-item { display:flex; justify-content:space-between; align-items:center; padding:6px 10px; border-bottom:1px solid #eee; }
+        .ranking-list .list-group-item .unidades-lista { font-size:12px; color:#6c757d; flex:1; margin-left:10px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 
         /* ===== SELETOR ===== */
         .seletor-unidade { display:flex; flex-wrap:wrap; align-items:center; gap:10px; padding:10px 15px; background:#f9f9f9; border-bottom:1px solid #ccc; }
@@ -134,6 +135,7 @@
 
     <!-- DASHBOARD -->
     <div class="dashboard">
+        <!-- Cards de estatísticas -->
         <div class="row">
             <div class="col-3"><div class="card-stat"><div class="label"><i class="fas fa-user-md"></i> Profissionais</div><div class="numero" id="totalProfissionais">0</div></div></div>
             <div class="col-3" style="border-left-color:#28a745;"><div class="card-stat"><div class="label"><i class="fas fa-building"></i> Unidades</div><div class="numero" id="totalUnidades">0</div></div></div>
@@ -145,17 +147,24 @@
             <div class="col-3" style="border-left-color:#e83e8c;"><div class="card-stat"><div class="label"><i class="fas fa-calendar-day"></i> Hoje</div><div class="numero" id="totalHoje">0</div></div></div>
         </div>
 
+        <!-- Gráficos -->
         <div class="row">
             <div class="col-6"><div class="grafico-container"><canvas id="chartMovimentoMensal"></canvas></div></div>
             <div class="col-6"><div class="grafico-container"><canvas id="chartMovimentoSemanal"></canvas></div></div>
         </div>
 
+        <!-- Rankings: Movimentação por Unidade e Fluxo de Lotação -->
         <div class="row">
             <div class="col-6">
-                <div class="ranking-list"><h5 style="padding:5px 0;">🏆 Ranking de Profissionais</h5><ul class="list-group list-group-flush" id="rankingProfissionais"><li class="list-group-item text-center text-muted">Carregando...</li></ul></div>
+                <div class="ranking-list"><h5 style="padding:5px 0;">📊 Movimentação por Unidade</h5><ul class="list-group list-group-flush" id="rankingMovimentacao"><li class="list-group-item text-center text-muted">Carregando...</li></ul></div>
             </div>
             <div class="col-6">
-                <div class="ranking-list"><h5 style="padding:5px 0;">📊 Movimentação por Unidade</h5><ul class="list-group list-group-flush" id="rankingMovimentacao"><li class="list-group-item text-center text-muted">Carregando...</li></ul></div>
+                <div class="ranking-list" style="max-height:260px;">
+                    <h5 style="padding:5px 0;">🏃 Controle de Fluxo de Lotação <small style="font-weight:normal;color:#6c757d;">(profissionais com mais unidades)</small></h5>
+                    <ul class="list-group list-group-flush" id="rankingFluxoLotacao">
+                        <li class="list-group-item text-center text-muted">Carregando...</li>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
@@ -176,7 +185,7 @@
         <span class="total-encontrados" id="totalEncontrados">0 encontrados</span>
     </div>
 
-    <!-- DADOS DA UNIDADE (exibe os dados da unidade selecionada ou mensagem global) -->
+    <!-- DADOS DA UNIDADE -->
     <div class="section-title">1. DADOS DA UNIDADE</div>
     <table>
         <tr><td data-label="CNES"><input id="cnes" disabled placeholder="--" /></td><td data-label="Nome"><input id="nomeUnidade" disabled placeholder="--" /></td><td data-label="UF"><input id="uf" disabled placeholder="--" /></td></tr>
@@ -209,9 +218,9 @@
 
     let sbClient = null;
     let todasUnidades = [];
-    let todosProfissionais = [];        // Lista completa
-    let profissionaisFiltrados = [];   // Lista após filtro de unidade ou busca
-    let unidadeSelecionada = null;     // CNES da unidade selecionada (null = todas)
+    let todosProfissionais = [];
+    let profissionaisFiltrados = [];
+    let unidadeSelecionada = null;
     let chartMensal = null, chartSemanal = null;
 
     // ============================================================
@@ -266,7 +275,6 @@
             sbClient = lib.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         }
 
-        // Unidades
         const { data: unid, error: e1 } = await sbClient
             .from('unidades_saude')
             .select('cnes, nome_unidade, uf, municipio')
@@ -274,7 +282,6 @@
         if (e1) throw e1;
         todasUnidades = unid || [];
 
-        // Profissionais
         const { data: profs, error: e2 } = await sbClient
             .from('profissionais')
             .select('*')
@@ -282,7 +289,6 @@
         if (e2) throw e2;
         todosProfissionais = profs || [];
 
-        // Atualizar select de unidades
         const select = document.getElementById('selecionarUnidade');
         select.innerHTML = '<option value="__todos__">-- Todos os profissionais --</option>';
         todasUnidades.forEach(u => {
@@ -292,7 +298,6 @@
             select.appendChild(opt);
         });
 
-        // Inicializa com todos
         unidadeSelecionada = null;
         profissionaisFiltrados = [...todosProfissionais];
         atualizarDashboard();
@@ -393,25 +398,7 @@
             }
         });
 
-        // Rankings
-        const rankProf = {};
-        profs.forEach(p => { if (p.cnes) rankProf[p.cnes] = (rankProf[p.cnes] || 0) + 1; });
-        const sortedProf = Object.entries(rankProf).sort((a,b) => b[1]-a[1]).slice(0,10);
-        const listProf = document.getElementById('rankingProfissionais');
-        listProf.innerHTML = '';
-        if (sortedProf.length === 0) {
-            listProf.innerHTML = '<li class="list-group-item text-center text-muted">Nenhum dado</li>';
-        } else {
-            sortedProf.forEach(([cnes, count]) => {
-                const un = todasUnidades.find(u => u.cnes === cnes);
-                const nome = un ? un.nome_unidade : 'N/I (' + cnes + ')';
-                const li = document.createElement('li');
-                li.className = 'list-group-item d-flex justify-content-between align-items-center';
-                li.innerHTML = `<span>${nome}</span><span class="badge bg-primary">${count}</span>`;
-                listProf.appendChild(li);
-            });
-        }
-
+        // RANKING: Movimentação por Unidade (atualizações)
         const rankMov = {};
         profs.forEach(p => {
             if (p.cnes && p.updated_at) {
@@ -433,6 +420,48 @@
                 listMov.appendChild(li);
             });
         }
+
+        // RANKING: Controle de Fluxo de Lotação (profissionais com mais unidades)
+        const fluxoMap = new Map();
+        profs.forEach(p => {
+            const nome = p.nome_profissional;
+            if (!nome) return;
+            const cnes = p.cnes;
+            if (!cnes) return;
+            if (!fluxoMap.has(nome)) {
+                fluxoMap.set(nome, { nome, unidades: new Set() });
+            }
+            fluxoMap.get(nome).unidades.add(cnes);
+        });
+        const fluxoArray = Array.from(fluxoMap.values())
+            .map(item => {
+                item.total = item.unidades.size;
+                return item;
+            })
+            .filter(item => item.total > 1)
+            .sort((a, b) => b.total - a.total)
+            .slice(0, 10);
+
+        const listFluxo = document.getElementById('rankingFluxoLotacao');
+        listFluxo.innerHTML = '';
+        if (fluxoArray.length === 0) {
+            listFluxo.innerHTML = '<li class="list-group-item text-center text-muted">Nenhum profissional com múltiplas lotações</li>';
+        } else {
+            fluxoArray.forEach((item, idx) => {
+                const nomesUnidades = Array.from(item.unidades).map(cnes => {
+                    const un = todasUnidades.find(u => u.cnes === cnes);
+                    return un ? un.nome_unidade : cnes;
+                }).join(', ');
+                const li = document.createElement('li');
+                li.className = 'list-group-item d-flex justify-content-between align-items-center';
+                li.innerHTML = `
+                    <span><strong>${idx+1}.</strong> ${item.nome}</span>
+                    <span class="unidades-lista" title="${nomesUnidades}">${nomesUnidades}</span>
+                    <span class="badge bg-danger">${item.total} unidades</span>
+                `;
+                listFluxo.appendChild(li);
+            });
+        }
     }
 
     // ============================================================
@@ -446,7 +475,6 @@
             limparDadosUnidade();
         } else {
             unidadeSelecionada = cnes;
-            // Buscar dados da unidade
             try {
                 const { data: unidade, error: e1 } = await sbClient
                     .from('unidades_saude')
@@ -471,12 +499,9 @@
                 console.error('Erro ao carregar unidade:', e);
                 limparDadosUnidade();
             }
-
             profissionaisFiltrados = todosProfissionais.filter(p => p.cnes === cnes);
         }
-        // Aplica a busca global sobre a lista filtrada
         aplicarBuscaGlobal();
-        // Atualiza a tabela
         renderizarTabelaProfissionais(profissionaisFiltrados);
     }
 
@@ -495,12 +520,11 @@
     }
 
     // ============================================================
-    // BUSCA GLOBAL (filtra a lista atual)
+    // BUSCA GLOBAL
     // ============================================================
     function aplicarBuscaGlobal() {
         const busca = document.getElementById('buscaProfissionais').value.toLowerCase().trim();
-        let lista = profissionaisFiltrados; // já filtrada por unidade
-
+        let lista = profissionaisFiltrados;
         if (busca) {
             lista = lista.filter(p => {
                 const texto = Object.values(p).join(' ').toLowerCase();
@@ -521,7 +545,6 @@
             document.getElementById('totalEncontrados').textContent = '0 encontrados';
             return;
         }
-
         lista.forEach((p, i) => {
             const tr = document.createElement('tr');
             tr.innerHTML = `
@@ -551,7 +574,6 @@
         executarDiagnostico();
     };
 
-    // Expor funções globalmente
     window.executarDiagnostico = executarDiagnostico;
     window.aplicarFiltroUnidade = aplicarFiltroUnidade;
     window.aplicarBuscaGlobal = aplicarBuscaGlobal;
