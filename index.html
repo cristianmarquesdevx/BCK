@@ -30,7 +30,7 @@
             overflow: hidden;
         }
 
-        /* ===== HEADER (mantido igual ao original) ===== */
+        /* ===== HEADER ===== */
         .header {
             border-bottom: 2px solid #003c7d;
         }
@@ -114,7 +114,7 @@
             100% { opacity: 0.6; }
         }
 
-        /* ===== DIAGNÓSTICO (mantido) ===== */
+        /* ===== DIAGNÓSTICO ===== */
         .diagnostico {
             background: #f8f9fa;
             padding: 8px 15px;
@@ -147,7 +147,7 @@
             color: #856404;
         }
 
-        /* ===== SEÇÃO DE ANÁLISE (Cards e Gráficos) ===== */
+        /* ===== SEÇÃO DE ANÁLISE ===== */
         .analytics-section {
             background: #f8f9fa;
             padding: 15px;
@@ -249,13 +249,70 @@
             display: flex;
             align-items: center;
             gap: 8px;
+            flex-wrap: wrap;
         }
         .alert-item.critical {
             border-left-color: #dc3545;
             background: #fce4e4;
         }
+        .alert-item .alert-actions {
+            margin-left: auto;
+            display: flex;
+            gap: 6px;
+        }
+        .alert-item .alert-actions button {
+            background: #003c7d;
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            padding: 2px 10px;
+            font-size: 11px;
+            cursor: pointer;
+        }
+        .alert-item .alert-actions button:hover {
+            background: #002a5a;
+        }
 
-        /* ===== SELETOR (mantido) ===== */
+        /* ===== SOLICITAÇÕES PENDENTES (ADMIN) ===== */
+        .solicitacoes-box {
+            background: #fff;
+            border-radius: 6px;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            margin-top: 10px;
+            max-height: 220px;
+            overflow-y: auto;
+        }
+        .solicitacao-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 0;
+            border-bottom: 1px solid #eee;
+            font-size: 13px;
+        }
+        .solicitacao-item .solic-info {
+            flex: 1;
+        }
+        .solicitacao-item .solic-actions button {
+            margin-left: 4px;
+            padding: 2px 12px;
+            border: none;
+            border-radius: 12px;
+            font-size: 12px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .solicitacao-item .solic-actions .btn-aprovar {
+            background: #28a745;
+            color: #fff;
+        }
+        .solicitacao-item .solic-actions .btn-rejeitar {
+            background: #dc3545;
+            color: #fff;
+        }
+
+        /* ===== SELETOR ===== */
         .seletor-unidade {
             display: flex;
             flex-wrap: wrap;
@@ -335,7 +392,7 @@
             color: #6c757d;
         }
 
-        /* ===== TABELAS (mantidas) ===== */
+        /* ===== TABELAS ===== */
         .section-title {
             background: #003c7d;
             color: #fff;
@@ -421,7 +478,9 @@
             .diagnostico,
             .btn-pdf,
             .btn-csv,
-            .busca-container {
+            .busca-container,
+            .solicitacoes-box,
+            .alert-actions {
                 display: none !important;
             }
             .analytics-section {
@@ -434,7 +493,7 @@
 
     <div class="container">
 
-        <!-- HEADER (mantido fiel ao original) -->
+        <!-- HEADER -->
         <div class="header">
             <div class="header-top">
                 <div class="logo-esquerda"><img src="logo_prefeitura.png" alt="Prefeitura" /></div>
@@ -464,6 +523,7 @@
             <span class="passo" id="passo3"><i class="fas fa-circle"></i> 3. Dados</span>
             <span class="passo" id="passo4"><i class="fas fa-circle"></i> 4. Realtime</span>
             <button onclick="executarDiagnostico()" style="margin-left:auto; background:#6c757d; color:white; border:none; padding:2px 12px; border-radius:12px; font-size:12px; cursor:pointer;"><i class="fas fa-sync-alt"></i> Testar</button>
+            <button onclick="forcarRecarga()" style="margin-left:4px; background:#28a745; color:white; border:none; padding:2px 12px; border-radius:12px; font-size:12px; cursor:pointer;"><i class="fas fa-refresh"></i> Forçar Recarga</button>
         </div>
 
         <!-- SEÇÃO DE ANÁLISE AVANÇADA -->
@@ -482,11 +542,18 @@
                 <div class="card-stat" style="border-left-color:#007bff;"><div class="label"><i class="fas fa-percent"></i> Completude</div><div class="value" id="kpiCompletude">0%</div></div>
             </div>
 
+            <!-- Cards de movimentação diária -->
+            <div class="cards-row" style="margin-top: -5px;">
+                <div class="card-stat" style="border-left-color:#28a745;"><div class="label"><i class="fas fa-user-plus"></i> Inclusões hoje</div><div class="value" id="kpiInclusoesHoje">0</div></div>
+                <div class="card-stat" style="border-left-color:#ffc107;"><div class="label"><i class="fas fa-user-edit"></i> Alterações hoje</div><div class="value" id="kpiAlteracoesHoje">0</div></div>
+                <div class="card-stat" style="border-left-color:#dc3545;"><div class="label"><i class="fas fa-user-minus"></i> Exclusões hoje</div><div class="value" id="kpiExclusoesHoje">0</div></div>
+            </div>
+
             <!-- Gráficos -->
             <div class="charts-grid">
                 <div class="chart-box"><h5><i class="fas fa-chart-bar"></i> Mov. Mensal</h5><canvas id="chartMensal" style="height:150px;"></canvas></div>
                 <div class="chart-box"><h5><i class="fas fa-chart-line"></i> Tendência Semanal</h5><canvas id="chartSemanal" style="height:150px;"></canvas></div>
-                <div class="chart-box"><h5><i class="fas fa-chart-pie"></i> CBO (Top 5)</h5><canvas id="chartCBO" style="height:150px;"></canvas></div>
+                <div class="chart-box"><h5><i class="fas fa-chart-pie"></i> CBO (Top 10)</h5><canvas id="chartCBO" style="height:150px;"></canvas></div>
                 <div class="chart-box"><h5><i class="fas fa-chart-radar"></i> Carga Horária</h5><canvas id="chartRadar" style="height:150px;"></canvas></div>
             </div>
 
@@ -501,9 +568,17 @@
                     <ul id="rankingMultiplas"><li style="color:#6c757d;">Carregando...</li></ul>
                 </div>
             </div>
+
+            <!-- ALERTAS INTELIGENTES -->
             <div class="alertas-box">
                 <h5><i class="fas fa-bell"></i> Alertas Inteligentes</h5>
                 <div id="alertList"><div class="alert-item">Nenhum alerta encontrado.</div></div>
+            </div>
+
+            <!-- SOLICITAÇÕES PENDENTES (ADMIN) - APENAS ALTERAÇÃO E EXCLUSÃO -->
+            <div class="solicitacoes-box" id="solicitacoesBox">
+                <h5><i class="fas fa-clock"></i> Solicitações Pendentes (Administrador)</h5>
+                <div id="solicitacoesList"><div style="color:#6c757d; padding:6px 0;">Carregando solicitações...</div></div>
             </div>
         </div>
 
@@ -525,7 +600,7 @@
             <span class="total-encontrados" id="totalEncontrados">0 encontrados</span>
         </div>
 
-        <!-- DADOS DA UNIDADE (mantido) -->
+        <!-- DADOS DA UNIDADE -->
         <div class="section-title">1. DADOS DA UNIDADE</div>
         <table>
             <tr><td data-label="CNES"><input id="cnes" disabled placeholder="--" /></td><td data-label="Nome"><input id="nomeUnidade" disabled placeholder="--" /></td><td data-label="UF"><input id="uf" disabled placeholder="--" /></td></tr>
@@ -535,7 +610,7 @@
             <tr><td data-label="Cargo"><input id="cargoResponsavel" disabled placeholder="--" /></td><td colspan="2" data-label="Data Preenchimento"><input id="dataPreenchimento" disabled type="date" placeholder="--" /></td></tr>
         </table>
 
-        <!-- PROFISSIONAIS (mantido) -->
+        <!-- PROFISSIONAIS -->
         <div class="section-title">2. RELAÇÃO DOS PROFISSIONAIS</div>
         <div class="profissionais">
             <table>
@@ -544,6 +619,15 @@
             </table>
         </div>
 
+    </div>
+
+    <!-- MODAL PARA DETALHES DOS ALERTAS -->
+    <div class="modal-overlay" id="modalAlertas">
+        <div class="modal-box">
+            <button class="close-modal" onclick="fecharModal('modalAlertas')">&times;</button>
+            <h3 id="modalAlertasTitulo">Detalhes</h3>
+            <div id="modalAlertasConteudo"></div>
+        </div>
     </div>
 
     <script>
@@ -568,6 +652,7 @@
             let todasOpcoesSelect = [];
             let subscription = null;
             let atualizando = false;
+            let solicitacoesPendentes = [];
 
             // ============================================================
             // DIAGNÓSTICO
@@ -608,6 +693,8 @@
                     supabaseClient = lib.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
                     setPasso(document.getElementById('passo1'), 'ok', 'Cliente criado');
 
+                    await verificarTabelaSolicitacoes();
+
                     const { data: unid, error: e1 } = await supabaseClient.from('unidades_saude').select('cnes').limit(1);
                     if (e1) throw new Error('Erro na tabela unidades_saude: ' + e1.message);
                     setPasso(document.getElementById('passo2'), 'ok', 'Tabelas acessíveis');
@@ -616,7 +703,6 @@
                     setPasso(document.getElementById('passo3'), 'ok', 'Dados carregados (' + todosProfissionais.length +
                         ' profissionais)');
 
-                    // Inicia subscription
                     iniciarRealtime();
                     setPasso(document.getElementById('passo4'), 'ok', 'Realtime ativo');
                     setStatus(true, 'Conectado + Realtime');
@@ -624,6 +710,22 @@
                     setPasso(document.getElementById('passo1'), 'erro', e.message);
                     setStatus(false, 'Erro: ' + e.message);
                     alert('❌ ' + e.message);
+                }
+            }
+
+            async function verificarTabelaSolicitacoes() {
+                try {
+                    const { error } = await supabaseClient.from('solicitacoes').select('id').limit(1);
+                    if (error && error.code === '42P01') {
+                        console.warn('Tabela solicitacoes não existe. Crie-a manualmente no SQL Editor.');
+                        alert('A tabela "solicitacoes" não existe. Por favor, crie-a manualmente no SQL Editor do Supabase.');
+                    } else if (error) {
+                        console.error('Erro ao verificar tabela solicitacoes:', error);
+                    } else {
+                        console.log('Tabela solicitacoes existe.');
+                    }
+                } catch (e) {
+                    console.warn('Erro ao verificar tabela solicitacoes:', e);
                 }
             }
 
@@ -636,31 +738,14 @@
                     subscription = null;
                 }
 
-                // Escuta mudanças nas tabelas profissionais e unidades_saude
                 const channel = supabaseClient
                     .channel('db-changes')
-                    .on(
-                        'postgres_changes', {
-                            event: '*',
-                            schema: 'public',
-                            table: 'profissionais'
-                        },
-                        (payload) => {
-                            console.log('Mudança em profissionais:', payload);
-                            handleRealtimeChange();
-                        }
-                    )
-                    .on(
-                        'postgres_changes', {
-                            event: '*',
-                            schema: 'public',
-                            table: 'unidades_saude'
-                        },
-                        (payload) => {
-                            console.log('Mudança em unidades_saude:', payload);
-                            handleRealtimeChange();
-                        }
-                    )
+                    .on('postgres_changes', { event: '*', schema: 'public', table: 'profissionais' }, () =>
+                        handleRealtimeChange())
+                    .on('postgres_changes', { event: '*', schema: 'public', table: 'unidades_saude' }, () =>
+                        handleRealtimeChange())
+                    .on('postgres_changes', { event: '*', schema: 'public', table: 'solicitacoes' }, () =>
+                        handleRealtimeChange())
                     .subscribe((status) => {
                         if (status === 'SUBSCRIBED') {
                             console.log('Realtime ativo');
@@ -678,12 +763,19 @@
 
             function handleRealtimeChange() {
                 if (atualizando) return;
-                // Debounce para evitar múltiplas atualizações em sequência
                 if (timeoutRealtime) clearTimeout(timeoutRealtime);
                 timeoutRealtime = setTimeout(() => {
                     recarregarDadosRealtime();
                 }, 500);
             }
+
+            // ============================================================
+            // RECARGA FORÇADA (botão)
+            // ============================================================
+            window.forcarRecarga = async function() {
+                await recarregarDadosRealtime();
+                alert('✅ Dados recarregados manualmente.');
+            };
 
             async function recarregarDadosRealtime() {
                 if (atualizando) return;
@@ -691,7 +783,6 @@
                 setStatus(true, 'Atualizando...', true);
 
                 try {
-                    // Recarregar unidades e profissionais
                     const { data: unid, error: e1 } = await supabaseClient
                         .from('unidades_saude')
                         .select('*')
@@ -706,11 +797,11 @@
                     if (e2) throw e2;
                     todosProfissionais = profs || [];
 
-                    // Atualizar select de unidades (sem recriar todas as opções para preservar a busca)
+                    await carregarSolicitacoes();
+
+                    // Atualizar select de unidades
                     const select = document.getElementById('selecionarUnidade');
-                    // Guarda o valor atualmente selecionado
                     const valorSelecionado = select.value;
-                    // Remove opções antigas (mantém a primeira que é "Todas")
                     while (select.options.length > 1) {
                         select.remove(1);
                     }
@@ -720,17 +811,14 @@
                         opt.textContent = (u.cnes ? u.cnes + ' - ' : '') + u.nome_unidade;
                         select.appendChild(opt);
                     });
-                    // Atualiza a lista de todas as opções para o filtro de busca
                     todasOpcoesSelect = Array.from(select.options);
 
-                    // Restaura seleção se ainda existir
                     if (valorSelecionado !== '__todos__' && todasUnidades.some(u => u.cnes === valorSelecionado)) {
                         select.value = valorSelecionado;
                     } else {
                         select.value = '__todos__';
                     }
 
-                    // Reaplica filtros atuais (unidade selecionada e busca global)
                     const unidadeAtual = document.getElementById('selecionarUnidade').value;
                     const buscaGlobal = document.getElementById('buscaProfissionais').value.trim();
 
@@ -741,7 +829,6 @@
                     }
 
                     if (buscaGlobal) {
-                        // Aplica busca global sobre a lista já filtrada por unidade
                         profissionaisFiltrados = profissionaisFiltrados.filter(p =>
                             (p.nome_profissional && p.nome_profissional.toLowerCase().includes(buscaGlobal
                             .toLowerCase())) ||
@@ -749,12 +836,10 @@
                         );
                     }
 
-                    // Atualiza dashboard e tabela
-                    atualizarDashboard();
+                    await atualizarDashboard();
                     renderizarTabelaProfissionais(profissionaisFiltrados);
                     document.getElementById('totalEncontrados').textContent = profissionaisFiltrados.length + ' encontrados';
 
-                    // Se uma unidade específica estava selecionada, atualiza os dados da unidade
                     if (unidadeAtual !== '__todos__') {
                         const unidade = todasUnidades.find(u => u.cnes === unidadeAtual);
                         if (unidade) {
@@ -778,6 +863,7 @@
                 } catch (e) {
                     console.error('Erro ao recarregar dados em tempo real:', e);
                     setStatus(false, 'Erro na atualização: ' + e.message);
+                    alert('❌ Erro ao recarregar: ' + e.message);
                 } finally {
                     atualizando = false;
                     if (timeoutRealtime) {
@@ -811,7 +897,8 @@
                 if (e2) throw e2;
                 todosProfissionais = profs || [];
 
-                // Popula select
+                await carregarSolicitacoes();
+
                 const select = document.getElementById('selecionarUnidade');
                 select.innerHTML = '<option value="__todos__">Todas as unidades</option>';
                 todasUnidades.forEach(u => {
@@ -825,10 +912,153 @@
                 document.getElementById('buscaUnidade').value = '';
                 unidadeSelecionada = null;
                 profissionaisFiltrados = [...todosProfissionais];
-                atualizarDashboard();
+                await atualizarDashboard();
                 renderizarTabelaProfissionais(profissionaisFiltrados);
                 limparDadosUnidade();
                 document.getElementById('totalEncontrados').textContent = profissionaisFiltrados.length + ' encontrados';
+            }
+
+            // ============================================================
+            // SOLICITAÇÕES - APENAS ALTERAÇÃO E EXCLUSÃO
+            // ============================================================
+            async function carregarSolicitacoes() {
+                try {
+                    // 🔥 FILTRO: apenas update e delete
+                    const { data, error } = await supabaseClient
+                        .from('solicitacoes')
+                        .select('*')
+                        .eq('status', 'pendente')
+                        .in('tipo', ['update', 'delete'])
+                        .order('criado_em', { ascending: false });
+                    if (error) throw error;
+                    solicitacoesPendentes = data || [];
+                    renderizarSolicitacoes();
+                } catch (e) {
+                    console.error('Erro ao carregar solicitações:', e);
+                    document.getElementById('solicitacoesList').innerHTML =
+                        '<div style="color:#6c757d; padding:6px 0;">Erro ao carregar solicitações: ' + e.message +
+                        '</div>';
+                }
+            }
+
+            function renderizarSolicitacoes() {
+                const container = document.getElementById('solicitacoesList');
+                container.innerHTML = '';
+                if (solicitacoesPendentes.length === 0) {
+                    container.innerHTML = '<div style="color:#6c757d; padding:6px 0;">Nenhuma solicitação pendente.</div>';
+                    return;
+                }
+                solicitacoesPendentes.forEach(sol => {
+                    const div = document.createElement('div');
+                    div.className = 'solicitacao-item';
+                    const info = document.createElement('div');
+                    info.className = 'solic-info';
+                    const prof = todosProfissionais.find(p => p.id === sol.profissional_id);
+                    const nomeProf = prof ? prof.nome_profissional : (sol.dados_antigos?.nome_profissional || 'ID ' +
+                        sol.profissional_id);
+                    const tipoAcao = sol.tipo === 'update' ? 'Alteração' : 'Exclusão';
+                    const dataStr = new Date(sol.criado_em).toLocaleString();
+                    info.innerHTML =
+                        `<strong>${tipoAcao}</strong> - ${nomeProf} <span style="font-size:12px;color:#6c757d;">${dataStr}</span>`;
+                    const actions = document.createElement('div');
+                    actions.className = 'solic-actions';
+                    const btnApr = document.createElement('button');
+                    btnApr.className = 'btn-aprovar';
+                    btnApr.textContent = 'Aprovar';
+                    btnApr.onclick = () => aprovarSolicitacao(sol.id);
+                    const btnRej = document.createElement('button');
+                    btnRej.className = 'btn-rejeitar';
+                    btnRej.textContent = 'Rejeitar';
+                    btnRej.onclick = () => rejeitarSolicitacao(sol.id);
+                    actions.appendChild(btnApr);
+                    actions.appendChild(btnRej);
+                    div.appendChild(info);
+                    div.appendChild(actions);
+                    container.appendChild(div);
+                });
+            }
+
+            // ============================================================
+            // APROVAR / REJEITAR
+            // ============================================================
+            async function aprovarSolicitacao(id) {
+                if (!confirm('Aprovar esta solicitação?')) return;
+                try {
+                    const { data: sol, error: e1 } = await supabaseClient
+                        .from('solicitacoes')
+                        .select('*')
+                        .eq('id', id)
+                        .single();
+                    if (e1) throw e1;
+
+                    console.log('📌 Solicitação aprovada:', sol);
+                    console.log('📌 Tipo:', sol.tipo);
+                    console.log('📌 profissional_id:', sol.profissional_id);
+
+                    if (sol.tipo === 'update') {
+                        if (!sol.profissional_id) throw new Error('ID do profissional não informado para atualização.');
+                        console.log(`➡️ Atualizando profissional ID ${sol.profissional_id}...`);
+                        const { error } = await supabaseClient
+                            .from('profissionais')
+                            .update(sol.dados_novos)
+                            .eq('id', sol.profissional_id);
+                        if (error) throw error;
+                        console.log('✅ Atualização OK');
+                    } else if (sol.tipo === 'delete') {
+                        if (!sol.profissional_id) throw new Error('ID do profissional não informado para exclusão.');
+                        console.log(`🗑️ Excluindo profissional ID ${sol.profissional_id}...`);
+                        const { error } = await supabaseClient
+                            .from('profissionais')
+                            .delete()
+                            .eq('id', sol.profissional_id);
+                        if (error) throw error;
+                        console.log('✅ Exclusão OK');
+                    } else {
+                        throw new Error(`Tipo de ação não permitido: "${sol.tipo}"`);
+                    }
+
+                    // Atualizar status da solicitação
+                    const { error: updateError } = await supabaseClient
+                        .from('solicitacoes')
+                        .update({ status: 'aprovado', aprovado_em: new Date().toISOString() })
+                        .eq('id', id);
+                    if (updateError) throw updateError;
+
+                    // REMOVER DA LISTA LOCAL IMEDIATAMENTE
+                    solicitacoesPendentes = solicitacoesPendentes.filter(s => s.id !== id);
+                    renderizarSolicitacoes();
+
+                    // Recarregar dados para atualizar alertas e cards
+                    await recarregarDadosRealtime();
+
+                    alert('✅ Solicitação aprovada e executada.');
+                } catch (e) {
+                    console.error('❌ Erro ao aprovar:', e);
+                    alert('❌ Erro ao aprovar: ' + e.message);
+                    await recarregarDadosRealtime();
+                }
+            }
+
+            async function rejeitarSolicitacao(id) {
+                if (!confirm('Rejeitar esta solicitação?')) return;
+                try {
+                    const { error: updateError } = await supabaseClient
+                        .from('solicitacoes')
+                        .update({ status: 'rejeitado' })
+                        .eq('id', id);
+                    if (updateError) throw updateError;
+
+                    // REMOVER DA LISTA LOCAL IMEDIATAMENTE
+                    solicitacoesPendentes = solicitacoesPendentes.filter(s => s.id !== id);
+                    renderizarSolicitacoes();
+
+                    alert('Solicitação rejeitada.');
+                    await recarregarDadosRealtime();
+                } catch (e) {
+                    console.error('Erro ao rejeitar:', e);
+                    alert('Erro ao rejeitar: ' + e.message);
+                    await recarregarDadosRealtime();
+                }
             }
 
             // ============================================================
@@ -893,11 +1123,10 @@
             // ============================================================
             // DASHBOARD (ATUALIZAR CARDS, GRÁFICOS, RANKINGS, ALERTAS)
             // ============================================================
-            function atualizarDashboard() {
+            async function atualizarDashboard() {
                 const profs = todosProfissionais;
                 const unids = todasUnidades;
 
-                // KPIs
                 document.getElementById('kpiTotalProf').textContent = profs.length;
                 document.getElementById('kpiTotalUnid').textContent = unids.length;
 
@@ -916,7 +1145,6 @@
                 const atualizadosHoje = profs.filter(p => p.updated_at && p.updated_at.startsWith(hoje));
                 document.getElementById('kpiHoje').textContent = atualizadosHoje.length;
 
-                // Completude
                 const obrigatorios = ['nome_profissional', 'cpf', 'cbo', 'conselho', 'registro', 'cnes'];
                 let completos = 0;
                 profs.forEach(p => {
@@ -926,10 +1154,38 @@
                 const perc = profs.length ? Math.round((completos / profs.length) * 100) : 0;
                 document.getElementById('kpiCompletude').textContent = perc + '%';
 
-                // Gráficos
+                await atualizarMovimentacoesHoje();
+
                 gerarGraficos(profs);
                 gerarRankings(profs);
                 gerarAlertas(profs);
+            }
+
+            // ============================================================
+            // MOVIMENTAÇÕES DE HOJE (aprovadas)
+            // ============================================================
+            async function atualizarMovimentacoesHoje() {
+                const hoje = new Date().toISOString().split('T')[0];
+                try {
+                    const { data, error } = await supabaseClient
+                        .from('solicitacoes')
+                        .select('tipo')
+                        .eq('status', 'aprovado')
+                        .gte('aprovado_em', hoje)
+                        .lt('aprovado_em', hoje + 'T23:59:59');
+                    if (error) throw error;
+                    const inclusoes = data.filter(s => s.tipo === 'insert').length;
+                    const alteracoes = data.filter(s => s.tipo === 'update').length;
+                    const exclusoes = data.filter(s => s.tipo === 'delete').length;
+                    document.getElementById('kpiInclusoesHoje').textContent = inclusoes;
+                    document.getElementById('kpiAlteracoesHoje').textContent = alteracoes;
+                    document.getElementById('kpiExclusoesHoje').textContent = exclusoes;
+                } catch (e) {
+                    console.error('Erro ao buscar movimentações de hoje:', e);
+                    document.getElementById('kpiInclusoesHoje').textContent = '?';
+                    document.getElementById('kpiAlteracoesHoje').textContent = '?';
+                    document.getElementById('kpiExclusoesHoje').textContent = '?';
+                }
             }
 
             // ============================================================
@@ -1006,16 +1262,19 @@
                     }
                 });
 
-                // CBO Top 5
+                // CBO Top 10
                 const cboCount = {};
                 profs.forEach(p => {
                     if (p.cbo) {
                         cboCount[p.cbo] = (cboCount[p.cbo] || 0) + 1;
                     }
                 });
-                const sortedCBO = Object.entries(cboCount).sort((a, b) => b[1] - a[1]).slice(0, 5);
+                const sortedCBO = Object.entries(cboCount).sort((a, b) => b[1] - a[1]).slice(0, 10);
                 const cboLabels = sortedCBO.map(([cbo]) => cbo);
                 const cboData = sortedCBO.map(([, count]) => count);
+                const cores = ['#003c7d', '#28a745', '#ffc107', '#dc3545', '#17a2b8', '#6f42c1', '#fd7e14', '#20c997',
+                    '#e83e8c', '#007bff'
+                ];
 
                 const ctx3 = document.getElementById('chartCBO').getContext('2d');
                 if (chartCBO) chartCBO.destroy();
@@ -1023,14 +1282,12 @@
                     type: 'pie',
                     data: {
                         labels: cboLabels.length ? cboLabels : ['Nenhum CBO'],
-                        datasets: [{ data: cboLabels.length ? cboData : [1], backgroundColor: ['#003c7d', '#28a745',
-                                '#ffc107', '#dc3545', '#17a2b8'
-                            ] }]
+                        datasets: [{ data: cboLabels.length ? cboData : [1], backgroundColor: cores }]
                     },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
-                        plugins: { legend: { position: 'bottom' } }
+                        plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } } }
                     }
                 });
 
@@ -1130,7 +1387,7 @@
             }
 
             // ============================================================
-            // ALERTAS
+            // ALERTAS (sem alerta de campos obrigatórios)
             // ============================================================
             function gerarAlertas(profs) {
                 const alertList = document.getElementById('alertList');
@@ -1143,30 +1400,43 @@
                 });
                 const duplicados = Object.entries(cpfCount).filter(([, count]) => count > 1);
                 if (duplicados.length) {
-                    alerts.push({ level: 'critical', icon: 'fa-user-slash', msg: `${duplicados.length} CPF(s) duplicado(s).` });
+                    const lista = duplicados.map(([cpf, qtd]) => ({ cpf, qtd }));
+                    alerts.push({
+                        level: 'critical',
+                        icon: 'fa-user-slash',
+                        msg: `${duplicados.length} CPF(s) duplicado(s).`,
+                        detalhes: lista,
+                        colunas: ['cpf', 'qtd'],
+                        titulo: 'CPFs Duplicados'
+                    });
                 }
 
                 // Registros órfãos
                 const orfaos = profs.filter(p => p.cnes && !todasUnidades.some(u => u.cnes === p.cnes));
                 if (orfaos.length) {
-                    alerts.push({ level: 'critical', icon: 'fa-building', msg: `${orfaos.length} profissional(is) com CNES sem unidade.` });
-                }
-
-                // Campos obrigatórios vazios
-                const obrigatorios = ['nome_profissional', 'cpf', 'cbo', 'conselho', 'registro'];
-                let incompletos = 0;
-                profs.forEach(p => {
-                    const ok = obrigatorios.every(campo => p[campo] && p[campo].trim() !== '');
-                    if (!ok) incompletos++;
-                });
-                if (incompletos) {
-                    alerts.push({ level: 'medium', icon: 'fa-exclamation-circle', msg: `${incompletos} profissional(is) com campos obrigatórios em branco.` });
+                    const lista = orfaos.map(p => ({ id: p.id, nome: p.nome_profissional || 'N/I', cpf: p.cpf || '',
+                        cnes: p.cnes }));
+                    alerts.push({
+                        level: 'critical',
+                        icon: 'fa-building',
+                        msg: `${orfaos.length} profissional(is) com CNES sem unidade.`,
+                        detalhes: lista,
+                        colunas: ['id', 'nome', 'cpf', 'cnes'],
+                        titulo: 'Profissionais com CNES sem unidade'
+                    });
                 }
 
                 // CBO inválido
                 const invalidos = profs.filter(p => p.cbo && !/^\d/.test(p.cbo));
                 if (invalidos.length) {
-                    alerts.push({ level: 'medium', icon: 'fa-id-card', msg: `${invalidos.length} profissional(is) com CBO inválido.` });
+                    alerts.push({
+                        level: 'medium',
+                        icon: 'fa-id-card',
+                        msg: `${invalidos.length} profissional(is) com CBO inválido.`,
+                        detalhes: invalidos.map(p => ({ id: p.id, nome: p.nome_profissional || 'N/I', cbo: p.cbo })),
+                        colunas: ['id', 'nome', 'cbo'],
+                        titulo: 'CBOs inválidos'
+                    });
                 }
 
                 // Unidades sem profissionais
@@ -1191,15 +1461,60 @@
 
                 alertList.innerHTML = '';
                 if (alerts.length === 0) {
-                    alertList.innerHTML = '<div class="alert-item" style="border-left-color:#28a745;background:#d4edda;"><i class="fas fa-check-circle"></i> Nenhum alerta crítico.</div>';
+                    alertList.innerHTML =
+                        '<div class="alert-item" style="border-left-color:#28a745;background:#d4edda;"><i class="fas fa-check-circle"></i> Nenhum alerta crítico.</div>';
                 } else {
                     alerts.forEach(a => {
                         const div = document.createElement('div');
                         div.className = 'alert-item' + (a.level === 'critical' ? ' critical' : '');
-                        div.innerHTML = `<i class="fas ${a.icon}"></i> ${a.msg}`;
+                        const msgSpan = document.createElement('span');
+                        msgSpan.innerHTML = `<i class="fas ${a.icon}"></i> ${a.msg}`;
+                        div.appendChild(msgSpan);
+                        if (a.detalhes && a.detalhes.length > 0) {
+                            const actions = document.createElement('div');
+                            actions.className = 'alert-actions';
+                            const btn = document.createElement('button');
+                            btn.textContent = 'Ver detalhes';
+                            btn.onclick = () => {
+                                abrirModalAlertas(a.titulo || 'Detalhes', a.detalhes, a.colunas || ['id',
+                                    'nome'
+                                ]);
+                            };
+                            actions.appendChild(btn);
+                            div.appendChild(actions);
+                        }
                         alertList.appendChild(div);
                     });
                 }
+            }
+
+            // ============================================================
+            // MODAL PARA DETALHES DOS ALERTAS
+            // ============================================================
+            function abrirModalAlertas(titulo, dados, colunas) {
+                document.getElementById('modalAlertasTitulo').textContent = titulo;
+                const conteudo = document.getElementById('modalAlertasConteudo');
+                if (!dados || dados.length === 0) {
+                    conteudo.innerHTML = '<p>Nenhum dado encontrado.</p>';
+                } else {
+                    let html = '<table><thead><tr>';
+                    colunas.forEach(col => html += `<th>${col}</th>`);
+                    html += '</tr></thead><tbody>';
+                    dados.forEach(item => {
+                        html += '<tr>';
+                        colunas.forEach(col => {
+                            html += `<td>${item[col] || ''}</td>`;
+                        });
+                        html += '</tr>';
+                    });
+                    html += '</tbody></table>';
+                    conteudo.innerHTML = html;
+                }
+                document.getElementById('modalAlertas').classList.add('active');
+            }
+
+            function fecharModal(id) {
+                document.getElementById(id).classList.remove('active');
             }
 
             // ============================================================
@@ -1376,6 +1691,10 @@
             window.filtrarOpcoesUnidade = filtrarOpcoesUnidade;
             window.exportarCSV = exportarCSV;
             window.carregarDados = carregarDados;
+            window.fecharModal = fecharModal;
+            window.abrirModalAlertas = abrirModalAlertas;
+            window.forcarRecarga = forcarRecarga;
+            window.recarregarDadosRealtime = recarregarDadosRealtime;
 
         })();
     </script>
