@@ -30,7 +30,7 @@
             overflow: hidden;
         }
 
-        /* ===== HEADER (Mantido igual ao original) ===== */
+        /* ===== HEADER (mantido igual ao original) ===== */
         .header {
             border-bottom: 2px solid #003c7d;
         }
@@ -103,6 +103,16 @@
             background: #dc3545;
             box-shadow: 0 0 6px #dc3545;
         }
+        .status-conexao .indicador.atualizando {
+            background: #ffc107;
+            box-shadow: 0 0 6px #ffc107;
+            animation: pulse 1s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
 
         /* ===== DIAGNÓSTICO (mantido) ===== */
         .diagnostico {
@@ -137,7 +147,7 @@
             color: #856404;
         }
 
-        /* ===== SEÇÃO DE ANÁLISE (Cards e Gráficos) - INSERIDA ===== */
+        /* ===== SEÇÃO DE ANÁLISE (Cards e Gráficos) ===== */
         .analytics-section {
             background: #f8f9fa;
             padding: 15px;
@@ -442,6 +452,7 @@
                 <div class="status-conexao" id="statusConexao">
                     <span class="indicador offline" id="indicadorStatus"></span>
                     <span id="textoStatus">Verificando...</span>
+                    <span id="tempoRealIndicator" style="font-size:11px;margin-left:6px;display:none;"><i class="fas fa-sync-alt fa-spin"></i> Atualizando...</span>
                 </div>
             </div>
         </div>
@@ -451,10 +462,11 @@
             <span class="passo" id="passo1"><i class="fas fa-circle"></i> 1. Cliente</span>
             <span class="passo" id="passo2"><i class="fas fa-circle"></i> 2. Tabela</span>
             <span class="passo" id="passo3"><i class="fas fa-circle"></i> 3. Dados</span>
+            <span class="passo" id="passo4"><i class="fas fa-circle"></i> 4. Realtime</span>
             <button onclick="executarDiagnostico()" style="margin-left:auto; background:#6c757d; color:white; border:none; padding:2px 12px; border-radius:12px; font-size:12px; cursor:pointer;"><i class="fas fa-sync-alt"></i> Testar</button>
         </div>
 
-        <!-- NOVA SEÇÃO: ANÁLISE AVANÇADA (Cards, Gráficos, Rankings, Alertas) -->
+        <!-- SEÇÃO DE ANÁLISE AVANÇADA -->
         <div class="analytics-section" id="analyticsSection">
             <!-- Cards -->
             <div class="cards-row">
@@ -554,6 +566,8 @@
                 chartCBO = null,
                 chartRadar = null;
             let todasOpcoesSelect = [];
+            let subscription = null;
+            let atualizando = false;
 
             // ============================================================
             // DIAGNÓSTICO
@@ -567,15 +581,26 @@
                 if (msg) { const t = el.childNodes[2]; if (t) t.textContent = ' ' + msg; }
             }
 
-            function setStatus(online, msg) {
-                document.getElementById('indicadorStatus').className = 'indicador ' + (online ? 'online' : 'offline');
-                document.getElementById('textoStatus').textContent = msg || (online ? 'Conectado' : 'Offline');
+            function setStatus(online, msg, atualizandoFlag = false) {
+                const dot = document.getElementById('indicadorStatus');
+                const text = document.getElementById('textoStatus');
+                const realtime = document.getElementById('tempoRealIndicator');
+                if (atualizandoFlag) {
+                    dot.className = 'indicador atualizando';
+                    text.textContent = 'Atualizando...';
+                    realtime.style.display = 'inline';
+                } else {
+                    dot.className = 'indicador ' + (online ? 'online' : 'offline');
+                    text.textContent = msg || (online ? 'Conectado' : 'Offline');
+                    realtime.style.display = 'none';
+                }
             }
 
             async function executarDiagnostico() {
                 setPasso(document.getElementById('passo1'), 'rodando', 'Criando cliente...');
                 setPasso(document.getElementById('passo2'), 'rodando', '...');
                 setPasso(document.getElementById('passo3'), 'rodando', '...');
+                setPasso(document.getElementById('passo4'), 'rodando', '...');
 
                 try {
                     const lib = (typeof supabase !== 'undefined') ? supabase : window.supabase;
@@ -590,7 +615,11 @@
                     await carregarDados();
                     setPasso(document.getElementById('passo3'), 'ok', 'Dados carregados (' + todosProfissionais.length +
                         ' profissionais)');
-                    setStatus(true, 'Conectado');
+
+                    // Inicia subscription
+                    iniciarRealtime();
+                    setPasso(document.getElementById('passo4'), 'ok', 'Realtime ativo');
+                    setStatus(true, 'Conectado + Realtime');
                 } catch (e) {
                     setPasso(document.getElementById('passo1'), 'erro', e.message);
                     setStatus(false, 'Erro: ' + e.message);
@@ -599,7 +628,167 @@
             }
 
             // ============================================================
-            // CARREGAR DADOS
+            // REALTIME SUBSCRIPTION
+            // ============================================================
+            function iniciarRealtime() {
+                if (subscription) {
+                    subscription.unsubscribe();
+                    subscription = null;
+                }
+
+                // Escuta mudanças nas tabelas profissionais e unidades_saude
+                const channel = supabaseClient
+                    .channel('db-changes')
+                    .on(
+                        'postgres_changes', {
+                            event: '*',
+                            schema: 'public',
+                            table: 'profissionais'
+                        },
+                        (payload) => {
+                            console.log('Mudança em profissionais:', payload);
+                            handleRealtimeChange();
+                        }
+                    )
+                    .on(
+                        'postgres_changes', {
+                            event: '*',
+                            schema: 'public',
+                            table: 'unidades_saude'
+                        },
+                        (payload) => {
+                            console.log('Mudança em unidades_saude:', payload);
+                            handleRealtimeChange();
+                        }
+                    )
+                    .subscribe((status) => {
+                        if (status === 'SUBSCRIBED') {
+                            console.log('Realtime ativo');
+                            setPasso(document.getElementById('passo4'), 'ok', 'Realtime ativo');
+                        } else {
+                            console.warn('Realtime status:', status);
+                            setPasso(document.getElementById('passo4'), 'erro', 'Falha no Realtime');
+                        }
+                    });
+
+                subscription = channel;
+            }
+
+            let timeoutRealtime = null;
+
+            function handleRealtimeChange() {
+                if (atualizando) return;
+                // Debounce para evitar múltiplas atualizações em sequência
+                if (timeoutRealtime) clearTimeout(timeoutRealtime);
+                timeoutRealtime = setTimeout(() => {
+                    recarregarDadosRealtime();
+                }, 500);
+            }
+
+            async function recarregarDadosRealtime() {
+                if (atualizando) return;
+                atualizando = true;
+                setStatus(true, 'Atualizando...', true);
+
+                try {
+                    // Recarregar unidades e profissionais
+                    const { data: unid, error: e1 } = await supabaseClient
+                        .from('unidades_saude')
+                        .select('*')
+                        .order('nome_unidade');
+                    if (e1) throw e1;
+                    todasUnidades = unid || [];
+
+                    const { data: profs, error: e2 } = await supabaseClient
+                        .from('profissionais')
+                        .select('*')
+                        .order('created_at', { ascending: false });
+                    if (e2) throw e2;
+                    todosProfissionais = profs || [];
+
+                    // Atualizar select de unidades (sem recriar todas as opções para preservar a busca)
+                    const select = document.getElementById('selecionarUnidade');
+                    // Guarda o valor atualmente selecionado
+                    const valorSelecionado = select.value;
+                    // Remove opções antigas (mantém a primeira que é "Todas")
+                    while (select.options.length > 1) {
+                        select.remove(1);
+                    }
+                    todasUnidades.forEach(u => {
+                        const opt = document.createElement('option');
+                        opt.value = u.cnes;
+                        opt.textContent = (u.cnes ? u.cnes + ' - ' : '') + u.nome_unidade;
+                        select.appendChild(opt);
+                    });
+                    // Atualiza a lista de todas as opções para o filtro de busca
+                    todasOpcoesSelect = Array.from(select.options);
+
+                    // Restaura seleção se ainda existir
+                    if (valorSelecionado !== '__todos__' && todasUnidades.some(u => u.cnes === valorSelecionado)) {
+                        select.value = valorSelecionado;
+                    } else {
+                        select.value = '__todos__';
+                    }
+
+                    // Reaplica filtros atuais (unidade selecionada e busca global)
+                    const unidadeAtual = document.getElementById('selecionarUnidade').value;
+                    const buscaGlobal = document.getElementById('buscaProfissionais').value.trim();
+
+                    if (unidadeAtual === '__todos__') {
+                        profissionaisFiltrados = [...todosProfissionais];
+                    } else {
+                        profissionaisFiltrados = todosProfissionais.filter(p => p.cnes === unidadeAtual);
+                    }
+
+                    if (buscaGlobal) {
+                        // Aplica busca global sobre a lista já filtrada por unidade
+                        profissionaisFiltrados = profissionaisFiltrados.filter(p =>
+                            (p.nome_profissional && p.nome_profissional.toLowerCase().includes(buscaGlobal
+                            .toLowerCase())) ||
+                            (p.cpf && p.cpf.includes(buscaGlobal))
+                        );
+                    }
+
+                    // Atualiza dashboard e tabela
+                    atualizarDashboard();
+                    renderizarTabelaProfissionais(profissionaisFiltrados);
+                    document.getElementById('totalEncontrados').textContent = profissionaisFiltrados.length + ' encontrados';
+
+                    // Se uma unidade específica estava selecionada, atualiza os dados da unidade
+                    if (unidadeAtual !== '__todos__') {
+                        const unidade = todasUnidades.find(u => u.cnes === unidadeAtual);
+                        if (unidade) {
+                            document.getElementById('cnes').value = unidade.cnes || '';
+                            document.getElementById('nomeUnidade').value = unidade.nome_unidade || '';
+                            document.getElementById('uf').value = unidade.uf || '';
+                            document.getElementById('tipoUnidade').value = unidade.tipo_unidade || '';
+                            document.getElementById('municipio').value = unidade.municipio || '';
+                            document.getElementById('endereco').value = unidade.endereco || '';
+                            document.getElementById('telefone').value = unidade.telefone || '';
+                            document.getElementById('responsavel').value = unidade.responsavel || '';
+                            document.getElementById('cargoResponsavel').value = unidade.cargo_responsavel || '';
+                            document.getElementById('dataEmissao').value = unidade.data_emissao || '';
+                            document.getElementById('dataPreenchimento').value = unidade.data_preenchimento || '';
+                        }
+                    } else {
+                        limparDadosUnidade();
+                    }
+
+                    setStatus(true, 'Atualizado!');
+                } catch (e) {
+                    console.error('Erro ao recarregar dados em tempo real:', e);
+                    setStatus(false, 'Erro na atualização: ' + e.message);
+                } finally {
+                    atualizando = false;
+                    if (timeoutRealtime) {
+                        clearTimeout(timeoutRealtime);
+                        timeoutRealtime = null;
+                    }
+                }
+            }
+
+            // ============================================================
+            // CARREGAR DADOS INICIAL
             // ============================================================
             async function carregarDados() {
                 if (!supabaseClient) {
