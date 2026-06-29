@@ -464,12 +464,170 @@
             }
         }
 
+        /* ===== MODAL ===== */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .modal-overlay.active {
+            display: flex;
+        }
+        .modal-box {
+            background: #fff;
+            border-radius: 8px;
+            max-width: 800px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 20px;
+            position: relative;
+            border: 1px solid #003c7d;
+        }
+        .modal-box .close-modal {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 28px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #003c7d;
+        }
+        .modal-box .close-modal:hover {
+            color: #dc3545;
+        }
+        .modal-box h3 {
+            color: #003c7d;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #003c7d;
+        }
+        .modal-box .campo-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+        .modal-box .campo-group .campo {
+            flex: 1 1 200px;
+        }
+        .modal-box .campo-group .campo label {
+            display: block;
+            font-weight: bold;
+            font-size: 13px;
+            color: #333;
+            margin-bottom: 2px;
+        }
+        .modal-box .campo-group .campo input,
+        .modal-box .campo-group .campo select {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+        .modal-box .campo-group .campo input:disabled {
+            background: #f1f1f1;
+            color: #555;
+        }
+        .modal-box .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+            border-top: 1px solid #eee;
+            padding-top: 15px;
+        }
+        .modal-box .modal-actions button {
+            padding: 8px 20px;
+            border: none;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .modal-box .modal-actions .btn-confirmar {
+            background: #28a745;
+            color: #fff;
+        }
+        .modal-box .modal-actions .btn-confirmar:hover {
+            background: #218838;
+        }
+        .modal-box .modal-actions .btn-cancelar {
+            background: #dc3545;
+            color: #fff;
+        }
+        .modal-box .modal-actions .btn-cancelar:hover {
+            background: #c82333;
+        }
+        .modal-box .dados-compare {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+        .modal-box .dados-compare .coluna-antiga {
+            border-right: 1px solid #dee2e6;
+            padding-right: 15px;
+        }
+        .modal-box .dados-compare .coluna-nova {
+            padding-left: 15px;
+        }
+        .modal-box .dados-compare h5 {
+            color: #003c7d;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        .modal-box .dados-compare .campo-linha {
+            display: flex;
+            margin-bottom: 4px;
+            font-size: 13px;
+        }
+        .modal-box .dados-compare .campo-linha .rotulo {
+            font-weight: bold;
+            width: 100px;
+            flex-shrink: 0;
+        }
+        .modal-box .dados-compare .campo-linha .valor {
+            color: #333;
+        }
+        .modal-box .dados-compare .campo-linha .valor.alterado {
+            background: #fff3cd;
+            padding: 0 4px;
+            border-radius: 3px;
+        }
+
         @media (max-width: 768px) {
             .rankings {
                 grid-template-columns: 1fr;
             }
             .charts-grid {
                 grid-template-columns: 1fr;
+            }
+            .modal-box .dados-compare {
+                grid-template-columns: 1fr;
+            }
+            .modal-box .dados-compare .coluna-antiga {
+                border-right: none;
+                border-bottom: 1px solid #dee2e6;
+                padding-right: 0;
+                padding-bottom: 10px;
+            }
+            .modal-box .dados-compare .coluna-nova {
+                padding-left: 0;
+                padding-top: 10px;
             }
         }
         @media print {
@@ -630,6 +788,21 @@
         </div>
     </div>
 
+    <!-- MODAL PARA APROVAÇÃO DE ALTERAÇÃO -->
+    <div class="modal-overlay" id="modalAprovacaoAlteracao">
+        <div class="modal-box">
+            <button class="close-modal" onclick="fecharModal('modalAprovacaoAlteracao')">&times;</button>
+            <h3 id="modalAprovacaoTitulo">Revisão de Alteração</h3>
+            <div id="modalAprovacaoConteudo">
+                <!-- será preenchido dinamicamente -->
+            </div>
+            <div class="modal-actions">
+                <button class="btn-cancelar" onclick="fecharModal('modalAprovacaoAlteracao')">Cancelar</button>
+                <button class="btn-confirmar" id="btnConfirmarAlteracao" onclick="confirmarAlteracao()">Confirmar Alteração</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         (function() {
             'use strict';
@@ -653,6 +826,9 @@
             let subscription = null;
             let atualizando = false;
             let solicitacoesPendentes = [];
+
+            // Variável para guardar a solicitação em aprovação
+            let solicitacaoEmAprovacao = null;
 
             // ============================================================
             // DIAGNÓSTICO
@@ -923,7 +1099,6 @@
             // ============================================================
             async function carregarSolicitacoes() {
                 try {
-                    // 🔥 FILTRO: apenas update e delete
                     const { data, error } = await supabaseClient
                         .from('solicitacoes')
                         .select('*')
@@ -979,10 +1154,9 @@
             }
 
             // ============================================================
-            // APROVAR / REJEITAR
+            // APROVAR / REJEITAR COM MODAL PARA ALTERAÇÃO
             // ============================================================
             async function aprovarSolicitacao(id) {
-                if (!confirm('Aprovar esta solicitação?')) return;
                 try {
                     const { data: sol, error: e1 } = await supabaseClient
                         .from('solicitacoes')
@@ -991,51 +1165,156 @@
                         .single();
                     if (e1) throw e1;
 
-                    console.log('📌 Solicitação aprovada:', sol);
-                    console.log('📌 Tipo:', sol.tipo);
-                    console.log('📌 profissional_id:', sol.profissional_id);
-
-                    if (sol.tipo === 'update') {
-                        if (!sol.profissional_id) throw new Error('ID do profissional não informado para atualização.');
-                        console.log(`➡️ Atualizando profissional ID ${sol.profissional_id}...`);
-                        const { error } = await supabaseClient
-                            .from('profissionais')
-                            .update(sol.dados_novos)
-                            .eq('id', sol.profissional_id);
-                        if (error) throw error;
-                        console.log('✅ Atualização OK');
-                    } else if (sol.tipo === 'delete') {
-                        if (!sol.profissional_id) throw new Error('ID do profissional não informado para exclusão.');
-                        console.log(`🗑️ Excluindo profissional ID ${sol.profissional_id}...`);
-                        const { error } = await supabaseClient
-                            .from('profissionais')
-                            .delete()
-                            .eq('id', sol.profissional_id);
-                        if (error) throw error;
-                        console.log('✅ Exclusão OK');
-                    } else {
-                        throw new Error(`Tipo de ação não permitido: "${sol.tipo}"`);
+                    if (sol.tipo === 'delete') {
+                        if (!confirm('Deseja realmente excluir este profissional?')) return;
+                        await executarDelete(sol);
+                        return;
                     }
 
-                    // Atualizar status da solicitação
+                    if (sol.tipo === 'update') {
+                        // Abrir modal para revisão da alteração
+                        mostrarModalAprovacaoAlteracao(sol);
+                        return;
+                    }
+
+                    // fallback (insert não é permitido aqui, mas caso venha)
+                    alert('Tipo de ação não suportado para aprovação direta.');
+                } catch (e) {
+                    console.error('Erro ao aprovar:', e);
+                    alert('❌ Erro ao aprovar: ' + e.message);
+                }
+            }
+
+            function mostrarModalAprovacaoAlteracao(sol) {
+                solicitacaoEmAprovacao = sol;
+
+                const container = document.getElementById('modalAprovacaoConteudo');
+                const antigos = sol.dados_antigos || {};
+                const novos = sol.dados_novos || {};
+
+                // Lista de campos a exibir
+                const campos = [
+                    { key: 'nome_profissional', label: 'Nome' },
+                    { key: 'cpf', label: 'CPF' },
+                    { key: 'cbo', label: 'CBO' },
+                    { key: 'conselho', label: 'Conselho' },
+                    { key: 'registro', label: 'Registro' },
+                    { key: 'uf_conselho', label: 'UF' },
+                    { key: 'cargo_funcao', label: 'Cargo' },
+                    { key: 'tipo_vinculo', label: 'Vínculo' },
+                    { key: 'carga_horaria', label: 'C.H.' },
+                    { key: 'setor_equipe', label: 'Setor' },
+                    { key: 'cnes', label: 'CNES' }
+                ];
+
+                let html = `
+                    <p style="margin-bottom:15px;color:#6c757d;">Revise os dados antes de confirmar a alteração. Os campos em <span style="background:#fff3cd;padding:0 4px;border-radius:3px;">destaque</span> serão alterados.</p>
+                    <div class="dados-compare">
+                        <div class="coluna-antiga">
+                            <h5>Dados Atuais</h5>
+                `;
+                campos.forEach(campo => {
+                    const valor = antigos[campo.key] || '';
+                    html += `
+                        <div class="campo-linha">
+                            <span class="rotulo">${campo.label}:</span>
+                            <span class="valor">${valor}</span>
+                        </div>
+                    `;
+                });
+                html += `
+                        </div>
+                        <div class="coluna-nova">
+                            <h5>Novos Dados (editáveis)</h5>
+                `;
+                campos.forEach(campo => {
+                    const valorAntigo = antigos[campo.key] || '';
+                    const valorNovo = novos[campo.key] || '';
+                    const alterado = valorAntigo !== valorNovo;
+                    html += `
+                        <div class="campo-linha">
+                            <span class="rotulo">${campo.label}:</span>
+                            <input type="text" class="valor" data-campo="${campo.key}" value="${valorNovo}" style="${alterado ? 'background:#fff3cd;' : ''}" />
+                        </div>
+                    `;
+                });
+                html += `
+                        </div>
+                    </div>
+                    <p style="font-size:13px;color:#6c757d;margin-top:10px;">* Edite os campos desejados e clique em "Confirmar Alteração".</p>
+                `;
+                container.innerHTML = html;
+                document.getElementById('modalAprovacaoTitulo').textContent = 'Revisão de Alteração - ID ' + sol.id;
+                document.getElementById('modalAprovacaoAlteracao').classList.add('active');
+            }
+
+            async function confirmarAlteracao() {
+                if (!solicitacaoEmAprovacao) return;
+
+                // Coletar os valores editados do modal
+                const inputs = document.querySelectorAll('#modalAprovacaoConteudo input.valor');
+                const novosDados = {};
+                inputs.forEach(inp => {
+                    const campo = inp.dataset.campo;
+                    novosDados[campo] = inp.value;
+                });
+
+                // Confirmar
+                if (!confirm('Confirmar a alteração com os dados revisados?')) return;
+
+                try {
+                    const sol = solicitacaoEmAprovacao;
+                    const { error } = await supabaseClient
+                        .from('profissionais')
+                        .update(novosDados)
+                        .eq('id', sol.profissional_id);
+                    if (error) throw error;
+
+                    // Atualizar solicitação
                     const { error: updateError } = await supabaseClient
                         .from('solicitacoes')
                         .update({ status: 'aprovado', aprovado_em: new Date().toISOString() })
-                        .eq('id', id);
+                        .eq('id', sol.id);
                     if (updateError) throw updateError;
 
-                    // REMOVER DA LISTA LOCAL IMEDIATAMENTE
-                    solicitacoesPendentes = solicitacoesPendentes.filter(s => s.id !== id);
+                    // Remover da lista local
+                    solicitacoesPendentes = solicitacoesPendentes.filter(s => s.id !== sol.id);
                     renderizarSolicitacoes();
 
-                    // Recarregar dados para atualizar alertas e cards
-                    await recarregarDadosRealtime();
+                    // Fechar modal
+                    fecharModal('modalAprovacaoAlteracao');
+                    solicitacaoEmAprovacao = null;
 
-                    alert('✅ Solicitação aprovada e executada.');
-                } catch (e) {
-                    console.error('❌ Erro ao aprovar:', e);
-                    alert('❌ Erro ao aprovar: ' + e.message);
+                    // Recarregar dados
                     await recarregarDadosRealtime();
+                    alert('✅ Alteração aprovada e executada com sucesso.');
+                } catch (e) {
+                    console.error('Erro ao confirmar alteração:', e);
+                    alert('❌ Erro ao confirmar alteração: ' + e.message);
+                }
+            }
+
+            async function executarDelete(sol) {
+                try {
+                    const { error } = await supabaseClient
+                        .from('profissionais')
+                        .delete()
+                        .eq('id', sol.profissional_id);
+                    if (error) throw error;
+
+                    const { error: updateError } = await supabaseClient
+                        .from('solicitacoes')
+                        .update({ status: 'aprovado', aprovado_em: new Date().toISOString() })
+                        .eq('id', sol.id);
+                    if (updateError) throw updateError;
+
+                    solicitacoesPendentes = solicitacoesPendentes.filter(s => s.id !== sol.id);
+                    renderizarSolicitacoes();
+                    await recarregarDadosRealtime();
+                    alert('✅ Exclusão aprovada e executada.');
+                } catch (e) {
+                    console.error('Erro ao excluir:', e);
+                    alert('❌ Erro ao excluir: ' + e.message);
                 }
             }
 
@@ -1048,7 +1327,6 @@
                         .eq('id', id);
                     if (updateError) throw updateError;
 
-                    // REMOVER DA LISTA LOCAL IMEDIATAMENTE
                     solicitacoesPendentes = solicitacoesPendentes.filter(s => s.id !== id);
                     renderizarSolicitacoes();
 
@@ -1387,26 +1665,33 @@
             }
 
             // ============================================================
-            // ALERTAS (sem alerta de campos obrigatórios)
+            // ALERTAS (com CPF duplicado mostrando nomes)
             // ============================================================
             function gerarAlertas(profs) {
                 const alertList = document.getElementById('alertList');
                 const alerts = [];
 
-                // CPF duplicado
-                const cpfCount = {};
+                // CPF duplicado - incluir nomes
+                const cpfMap = {};
                 profs.forEach(p => {
-                    if (p.cpf) cpfCount[p.cpf] = (cpfCount[p.cpf] || 0) + 1;
+                    if (p.cpf) {
+                        if (!cpfMap[p.cpf]) cpfMap[p.cpf] = [];
+                        cpfMap[p.cpf].push(p.nome_profissional || 'N/I');
+                    }
                 });
-                const duplicados = Object.entries(cpfCount).filter(([, count]) => count > 1);
+                const duplicados = Object.entries(cpfMap).filter(([, nomes]) => nomes.length > 1);
                 if (duplicados.length) {
-                    const lista = duplicados.map(([cpf, qtd]) => ({ cpf, qtd }));
+                    const detalhes = duplicados.map(([cpf, nomes]) => ({
+                        cpf: cpf,
+                        nomes: nomes.join(', '),
+                        qtd: nomes.length
+                    }));
                     alerts.push({
                         level: 'critical',
                         icon: 'fa-user-slash',
                         msg: `${duplicados.length} CPF(s) duplicado(s).`,
-                        detalhes: lista,
-                        colunas: ['cpf', 'qtd'],
+                        detalhes: detalhes,
+                        colunas: ['Nomes', 'CPF', 'Quantidade'],
                         titulo: 'CPFs Duplicados'
                     });
                 }
@@ -1515,6 +1800,9 @@
 
             function fecharModal(id) {
                 document.getElementById(id).classList.remove('active');
+                if (id === 'modalAprovacaoAlteracao') {
+                    solicitacaoEmAprovacao = null;
+                }
             }
 
             // ============================================================
@@ -1695,6 +1983,7 @@
             window.abrirModalAlertas = abrirModalAlertas;
             window.forcarRecarga = forcarRecarga;
             window.recarregarDadosRealtime = recarregarDadosRealtime;
+            window.confirmarAlteracao = confirmarAlteracao;
 
         })();
     </script>
