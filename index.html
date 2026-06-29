@@ -167,9 +167,11 @@
             padding: 10px 12px;
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
             transition: 0.2s;
+            cursor: pointer;
         }
         .card-stat:hover {
             transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
         .card-stat .label {
             color: #6c757d;
@@ -202,6 +204,8 @@
             margin-bottom: 6px;
             color: #343a40;
         }
+
+        /* Rankings - removido ranking de unidades */
         .rankings {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -233,6 +237,10 @@
             border-radius: 12px;
             font-size: 11px;
         }
+        .rankings .ranking-unidades {
+            display: none !important;
+        }
+
         .alertas-box {
             background: #fff;
             border-radius: 6px;
@@ -387,12 +395,20 @@
             font-size: 14px;
             background: white;
         }
+        .busca-container select {
+            padding: 8px 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+            background: white;
+            min-width: 140px;
+        }
         .busca-container .total-encontrados {
             font-size: 14px;
             color: #6c757d;
         }
 
-        /* ===== TABELAS ===== */
+        /* ===== TABELAS (tela) ===== */
         .section-title {
             background: #003c7d;
             color: #fff;
@@ -484,7 +500,7 @@
         .modal-box {
             background: #fff;
             border-radius: 8px;
-            max-width: 800px;
+            max-width: 950px;
             width: 100%;
             max-height: 90vh;
             overflow-y: auto;
@@ -511,62 +527,34 @@
             padding-bottom: 8px;
             border-bottom: 2px solid #003c7d;
         }
-        .modal-box .campo-group {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 12px;
-        }
-        .modal-box .campo-group .campo {
-            flex: 1 1 200px;
-        }
-        .modal-box .campo-group .campo label {
-            display: block;
-            font-weight: bold;
-            font-size: 13px;
-            color: #333;
-            margin-bottom: 2px;
-        }
-        .modal-box .campo-group .campo input,
-        .modal-box .campo-group .campo select {
+        .modal-box table {
             width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        .modal-box table th {
+            background: #dbe5f1;
+            border: 1px solid #b9c3d0;
             padding: 6px 8px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
+            text-align: left;
             font-size: 13px;
         }
-        .modal-box .campo-group .campo input:disabled {
-            background: #f1f1f1;
-            color: #555;
+        .modal-box table td {
+            border: 1px solid #b9c3d0;
+            padding: 6px 8px;
+            font-size: 13px;
+            vertical-align: middle;
         }
-        .modal-box .modal-actions {
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-            margin-top: 20px;
-            border-top: 1px solid #eee;
-            padding-top: 15px;
-        }
-        .modal-box .modal-actions button {
-            padding: 8px 20px;
-            border: none;
-            border-radius: 4px;
-            font-weight: bold;
-            cursor: pointer;
-            font-size: 14px;
-        }
-        .modal-box .modal-actions .btn-confirmar {
-            background: #28a745;
-            color: #fff;
-        }
-        .modal-box .modal-actions .btn-confirmar:hover {
-            background: #218838;
-        }
-        .modal-box .modal-actions .btn-cancelar {
+        .modal-box .btn-excluir-duplicado {
             background: #dc3545;
             color: #fff;
+            border: none;
+            border-radius: 4px;
+            padding: 3px 12px;
+            font-size: 12px;
+            cursor: pointer;
         }
-        .modal-box .modal-actions .btn-cancelar:hover {
+        .modal-box .btn-excluir-duplicado:hover {
             background: #c82333;
         }
         .modal-box .dados-compare {
@@ -608,6 +596,200 @@
             padding: 0 4px;
             border-radius: 3px;
         }
+        .modal-box .dados-compare .campo-linha select.valor {
+            width: 100%;
+            padding: 2px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background: #fff;
+        }
+        .modal-box .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+            border-top: 1px solid #eee;
+            padding-top: 15px;
+        }
+        .modal-box .modal-actions button {
+            padding: 8px 20px;
+            border: none;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .modal-box .modal-actions .btn-confirmar {
+            background: #28a745;
+            color: #fff;
+        }
+        .modal-box .modal-actions .btn-confirmar:hover {
+            background: #218838;
+        }
+        .modal-box .modal-actions .btn-cancelar {
+            background: #dc3545;
+            color: #fff;
+        }
+        .modal-box .modal-actions .btn-cancelar:hover {
+            background: #c82333;
+        }
+
+        /* ===== FICHA DE IMPRESSÃO ===== */
+        .ficha-impressao {
+            display: none;
+        }
+
+        /* ===== IMPRESSÃO ===== */
+        @media print {
+            body {
+                background: #fff !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+            .container {
+                border: none !important;
+                border-radius: 0 !important;
+                max-width: 100% !important;
+                box-shadow: none !important;
+                background: #fff !important;
+            }
+            .header,
+            .header-top,
+            .logo-esquerda,
+            .logo-direita,
+            .titulos,
+            .titulo,
+            .info-versao,
+            .status-conexao,
+            .diagnostico,
+            .analytics-section,
+            .cards-row,
+            .charts-grid,
+            .rankings,
+            .alertas-box,
+            .solicitacoes-box,
+            .seletor-unidade,
+            .btn-pdf,
+            .btn-csv,
+            .busca-container,
+            .section-title,
+            .profissionais,
+            .modal-overlay {
+                display: none !important;
+            }
+            .ficha-impressao {
+                display: block !important;
+                padding: 20px 25px;
+                font-family: Arial, Helvetica, sans-serif;
+                background: #fff;
+                width: 100%;
+                max-width: 100%;
+                margin: 0 auto;
+            }
+            .ficha-impressao .header-ficha {
+                text-align: center;
+                margin-bottom: 15px;
+                border-bottom: 2px solid #003c7d;
+                padding-bottom: 12px;
+            }
+            .ficha-impressao .header-ficha h2 {
+                color: #003c7d;
+                font-size: 18px;
+                margin: 0;
+                font-weight: bold;
+                letter-spacing: 1px;
+            }
+            .ficha-impressao .header-ficha h3 {
+                color: #003c7d;
+                font-size: 13px;
+                font-weight: normal;
+                margin: 3px 0;
+            }
+            .ficha-impressao .header-ficha .titulo-ficha {
+                background: #003c7d;
+                color: #fff;
+                padding: 6px 0;
+                font-weight: bold;
+                font-size: 15px;
+                margin: 8px 0 0 0;
+                text-align: center;
+                letter-spacing: 0.5px;
+            }
+            .ficha-impressao .unidade-dados {
+                margin: 12px 0 10px 0;
+                font-size: 13px;
+                font-weight: bold;
+                border-bottom: 1px solid #000;
+                padding-bottom: 6px;
+            }
+            .ficha-impressao .unidade-dados span {
+                font-weight: normal;
+            }
+            .ficha-impressao .profissionais-ficha {
+                margin-top: 8px;
+            }
+            .ficha-impressao .profissionais-ficha strong {
+                font-size: 13px;
+                display: block;
+                margin-bottom: 6px;
+            }
+            .ficha-impressao table {
+                width: 100%;
+                border-collapse: collapse;
+                font-size: 9px;
+                margin-top: 4px;
+                page-break-inside: auto;
+            }
+            .ficha-impressao table th {
+                background: #dbe5f1;
+                border: 1px solid #000;
+                padding: 4px 3px;
+                text-align: center;
+                font-weight: bold;
+                font-size: 8.5px;
+                white-space: nowrap;
+            }
+            .ficha-impressao table td {
+                border: 1px solid #000;
+                padding: 3px 3px;
+                text-align: center;
+                font-size: 8.5px;
+                word-break: break-word;
+            }
+            .ficha-impressao table tr {
+                page-break-inside: avoid;
+            }
+            .ficha-impressao table thead {
+                display: table-header-group;
+            }
+            .ficha-impressao .rodape {
+                margin-top: 25px;
+                font-size: 10px;
+                text-align: center;
+                border-top: 1px solid #ccc;
+                padding-top: 12px;
+                color: #333;
+            }
+            .ficha-impressao .rodape p {
+                margin: 3px 0;
+                line-height: 1.4;
+            }
+            .ficha-impressao .rodape .endereco {
+                font-size: 9px;
+                color: #555;
+            }
+            .ficha-impressao .rodape .copyright {
+                font-size: 9px;
+                color: #777;
+                margin-top: 6px;
+            }
+            .ficha-impressao .header-ficha h2:first-child {
+                margin-top: 0;
+            }
+            .container {
+                background: #fff !important;
+            }
+        }
 
         @media (max-width: 768px) {
             .rankings {
@@ -628,21 +810,6 @@
             .modal-box .dados-compare .coluna-nova {
                 padding-left: 0;
                 padding-top: 10px;
-            }
-        }
-        @media print {
-            .seletor-unidade,
-            .status-conexao,
-            .diagnostico,
-            .btn-pdf,
-            .btn-csv,
-            .busca-container,
-            .solicitacoes-box,
-            .alert-actions {
-                display: none !important;
-            }
-            .analytics-section {
-                display: block !important;
             }
         }
     </style>
@@ -688,23 +855,62 @@
         <div class="analytics-section" id="analyticsSection">
             <!-- Cards -->
             <div class="cards-row">
-                <div class="card-stat"><div class="label"><i class="fas fa-user-md"></i> Profissionais</div><div class="value" id="kpiTotalProf">0</div></div>
-                <div class="card-stat" style="border-left-color:#28a745;"><div class="label"><i class="fas fa-building"></i> Unidades</div><div class="value" id="kpiTotalUnid">0</div></div>
-                <div class="card-stat" style="border-left-color:#ffc107;"><div class="label"><i class="fas fa-stethoscope"></i> Médicos</div><div class="value" id="kpiMedicos">0</div></div>
-                <div class="card-stat" style="border-left-color:#17a2b8;"><div class="label"><i class="fas fa-user-nurse"></i> Enfermeiros</div><div class="value" id="kpiEnfermeiros">0</div></div>
-                <div class="card-stat" style="border-left-color:#6f42c1;"><div class="label"><i class="fas fa-user-friends"></i> ACS</div><div class="value" id="kpiACS">0</div></div>
-                <div class="card-stat" style="border-left-color:#fd7e14;"><div class="label"><i class="fas fa-tooth"></i> Dentistas</div><div class="value" id="kpiDentistas">0</div></div>
-                <div class="card-stat" style="border-left-color:#20c997;"><div class="label"><i class="fas fa-tags"></i> CBOs</div><div class="value" id="kpiCBOs">0</div></div>
-                <div class="card-stat" style="border-left-color:#e83e8c;"><div class="label"><i class="fas fa-calendar-day"></i> Hoje</div><div class="value" id="kpiHoje">0</div></div>
-                <div class="card-stat" style="border-left-color:#dc3545;"><div class="label"><i class="fas fa-exclamation-triangle"></i> Alertas</div><div class="value" id="kpiAlertas">0</div></div>
-                <div class="card-stat" style="border-left-color:#007bff;"><div class="label"><i class="fas fa-percent"></i> Completude</div><div class="value" id="kpiCompletude">0%</div></div>
+                <div class="card-stat" onclick="abrirModalKPI('totalProfissionais')">
+                    <div class="label"><i class="fas fa-user-md"></i> Profissionais</div>
+                    <div class="value" id="kpiTotalProf">0</div>
+                </div>
+                <div class="card-stat" style="border-left-color:#28a745;" onclick="abrirModalKPI('totalUnidades')">
+                    <div class="label"><i class="fas fa-building"></i> Unidades</div>
+                    <div class="value" id="kpiTotalUnid">0</div>
+                </div>
+                <div class="card-stat" style="border-left-color:#ffc107;" onclick="abrirModalKPI('medicos')">
+                    <div class="label"><i class="fas fa-stethoscope"></i> Médicos</div>
+                    <div class="value" id="kpiMedicos">0</div>
+                </div>
+                <div class="card-stat" style="border-left-color:#17a2b8;" onclick="abrirModalKPI('enfermeiros')">
+                    <div class="label"><i class="fas fa-user-nurse"></i> Enfermeiros</div>
+                    <div class="value" id="kpiEnfermeiros">0</div>
+                </div>
+                <div class="card-stat" style="border-left-color:#6f42c1;" onclick="abrirModalKPI('acs')">
+                    <div class="label"><i class="fas fa-user-friends"></i> ACS</div>
+                    <div class="value" id="kpiACS">0</div>
+                </div>
+                <div class="card-stat" style="border-left-color:#fd7e14;" onclick="abrirModalKPI('dentistas')">
+                    <div class="label"><i class="fas fa-tooth"></i> Dentistas</div>
+                    <div class="value" id="kpiDentistas">0</div>
+                </div>
+                <div class="card-stat" style="border-left-color:#20c997;" onclick="abrirModalKPI('cbos')">
+                    <div class="label"><i class="fas fa-tags"></i> CBOs</div>
+                    <div class="value" id="kpiCBOs">0</div>
+                </div>
+                <div class="card-stat" style="border-left-color:#e83e8c;" onclick="abrirModalKPI('hoje')">
+                    <div class="label"><i class="fas fa-calendar-day"></i> Hoje</div>
+                    <div class="value" id="kpiHoje">0</div>
+                </div>
+                <div class="card-stat" style="border-left-color:#dc3545;" onclick="abrirModalKPI('alertas')">
+                    <div class="label"><i class="fas fa-exclamation-triangle"></i> Alertas</div>
+                    <div class="value" id="kpiAlertas">0</div>
+                </div>
+                <div class="card-stat" style="border-left-color:#007bff;" onclick="abrirModalKPI('completude')">
+                    <div class="label"><i class="fas fa-percent"></i> Completude</div>
+                    <div class="value" id="kpiCompletude">0%</div>
+                </div>
             </div>
 
             <!-- Cards de movimentação diária -->
             <div class="cards-row" style="margin-top: -5px;">
-                <div class="card-stat" style="border-left-color:#28a745;"><div class="label"><i class="fas fa-user-plus"></i> Inclusões hoje</div><div class="value" id="kpiInclusoesHoje">0</div></div>
-                <div class="card-stat" style="border-left-color:#ffc107;"><div class="label"><i class="fas fa-user-edit"></i> Alterações hoje</div><div class="value" id="kpiAlteracoesHoje">0</div></div>
-                <div class="card-stat" style="border-left-color:#dc3545;"><div class="label"><i class="fas fa-user-minus"></i> Exclusões hoje</div><div class="value" id="kpiExclusoesHoje">0</div></div>
+                <div class="card-stat" style="border-left-color:#28a745;" onclick="abrirModalKPI('inclusoesHoje')">
+                    <div class="label"><i class="fas fa-user-plus"></i> Inclusões hoje</div>
+                    <div class="value" id="kpiInclusoesHoje">0</div>
+                </div>
+                <div class="card-stat" style="border-left-color:#ffc107;" onclick="abrirModalKPI('alteracoesHoje')">
+                    <div class="label"><i class="fas fa-user-edit"></i> Alterações hoje</div>
+                    <div class="value" id="kpiAlteracoesHoje">0</div>
+                </div>
+                <div class="card-stat" style="border-left-color:#dc3545;" onclick="abrirModalKPI('exclusoesHoje')">
+                    <div class="label"><i class="fas fa-user-minus"></i> Exclusões hoje</div>
+                    <div class="value" id="kpiExclusoesHoje">0</div>
+                </div>
             </div>
 
             <!-- Gráficos -->
@@ -715,13 +921,9 @@
                 <div class="chart-box"><h5><i class="fas fa-chart-radar"></i> Carga Horária</h5><canvas id="chartRadar" style="height:150px;"></canvas></div>
             </div>
 
-            <!-- Rankings e Alertas -->
+            <!-- Rankings - apenas múltiplas lotações -->
             <div class="rankings">
-                <div class="ranking-list">
-                    <h5><i class="fas fa-trophy"></i> Unidades com + profissionais</h5>
-                    <ul id="rankingUnidades"><li style="color:#6c757d;">Carregando...</li></ul>
-                </div>
-                <div class="ranking-list">
+                <div class="ranking-list" style="grid-column: 1 / -1;">
                     <h5><i class="fas fa-people-arrows"></i> Profissionais com múltiplas lotações</h5>
                     <ul id="rankingMultiplas"><li style="color:#6c757d;">Carregando...</li></ul>
                 </div>
@@ -733,7 +935,7 @@
                 <div id="alertList"><div class="alert-item">Nenhum alerta encontrado.</div></div>
             </div>
 
-            <!-- SOLICITAÇÕES PENDENTES (ADMIN) - APENAS ALTERAÇÃO E EXCLUSÃO -->
+            <!-- SOLICITAÇÕES PENDENTES (ADMIN) -->
             <div class="solicitacoes-box" id="solicitacoesBox">
                 <h5><i class="fas fa-clock"></i> Solicitações Pendentes (Administrador)</h5>
                 <div id="solicitacoesList"><div style="color:#6c757d; padding:6px 0;">Carregando solicitações...</div></div>
@@ -752,13 +954,19 @@
             <button class="btn-csv" onclick="exportarCSV()"><i class="fas fa-file-csv"></i> CSV</button>
         </div>
 
-        <!-- BARRA DE BUSCA GLOBAL -->
+        <!-- BARRA DE BUSCA GLOBAL + FILTRO ESPECIALIDADE -->
         <div class="busca-container">
-            <input type="text" id="buscaProfissionais" placeholder="🔍 Buscar por nome ou CPF (consulta em toda a base)..." oninput="aplicarBuscaGlobal()" />
+            <input type="text" id="buscaProfissionais" placeholder="🔍 Buscar por nome, CPF ou especialidade..." oninput="aplicarBuscaGlobal()" />
+            <select id="filtroEspecialidade" onchange="aplicarBuscaGlobal()">
+                <option value="todos">Todos</option>
+                <option value="medico">Médico</option>
+                <option value="enfermeiro">Enfermeiro</option>
+                <option value="dentista">Dentista</option>
+            </select>
             <span class="total-encontrados" id="totalEncontrados">0 encontrados</span>
         </div>
 
-        <!-- DADOS DA UNIDADE -->
+        <!-- DADOS DA UNIDADE (tela) -->
         <div class="section-title">1. DADOS DA UNIDADE</div>
         <table>
             <tr><td data-label="CNES"><input id="cnes" disabled placeholder="--" /></td><td data-label="Nome"><input id="nomeUnidade" disabled placeholder="--" /></td><td data-label="UF"><input id="uf" disabled placeholder="--" /></td></tr>
@@ -768,7 +976,7 @@
             <tr><td data-label="Cargo"><input id="cargoResponsavel" disabled placeholder="--" /></td><td colspan="2" data-label="Data Preenchimento"><input id="dataPreenchimento" disabled type="date" placeholder="--" /></td></tr>
         </table>
 
-        <!-- PROFISSIONAIS -->
+        <!-- PROFISSIONAIS (tela) -->
         <div class="section-title">2. RELAÇÃO DOS PROFISSIONAIS</div>
         <div class="profissionais">
             <table>
@@ -777,9 +985,54 @@
             </table>
         </div>
 
+        <!-- ===== FICHA DE IMPRESSÃO ===== -->
+        <div class="ficha-impressao" id="fichaImpressao">
+            <div class="header-ficha">
+                <h2>PREFEITURA DO MUNICÍPIO DE PORTO VELHO</h2>
+                <h3>SECRETARIA MUNICIPAL DE SAÚDE – SEMUSA</h3>
+                <h3>DIVISÃO DE CONTROLE E AVALIAÇÃO DO SUS</h3>
+                <div class="titulo-ficha">PLANILHA DE ATUALIZAÇÃO CADASTRAL DOS PROFISSIONAIS – CNES</div>
+            </div>
+            <div class="unidade-dados">
+                <strong>1. UNIDADE DE LOTAÇÃO</strong><br />
+                <span id="fichaCnes">--</span> - <span id="fichaNomeUnidade">--</span>
+            </div>
+            <div class="profissionais-ficha">
+                <strong>2. RELAÇÃO DOS PROFISSIONAIS</strong>
+                <table id="tabelaFicha">
+                    <thead>
+                        <tr>
+                            <th>N°</th>
+                            <th>Ação</th>
+                            <th>Nome Completo</th>
+                            <th>CPF</th>
+                            <th>CBO</th>
+                            <th>Conselho</th>
+                            <th>N° Registro</th>
+                            <th>UF</th>
+                            <th>Cargo/Função</th>
+                            <th>Tipo de Vínculo</th>
+                            <th>Carga Hor.</th>
+                            <th>Setor/Equipe</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbodyFicha">
+                        <tr><td colspan="12" style="text-align:center;">Nenhum profissional encontrado.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="rodape">
+                <p>Desenvolvido por Cristian Marques</p>
+                <p>SEMUSA - Secretaria Municipal de Saúde de Porto Velho</p>
+                <p class="endereco">Avenida Campos Sales, 2283 - Centro - Porto Velho/RO - CEP: 76804-358</p>
+                <p class="endereco">Telefone: (69) 3901-6126 | E-mail: gecav.semusa@portovelho.ro.gov.br</p>
+                <p class="copyright">© 2026 - Todos os direitos reservados</p>
+            </div>
+        </div>
+
     </div>
 
-    <!-- MODAL PARA DETALHES DOS ALERTAS -->
+    <!-- MODAIS -->
     <div class="modal-overlay" id="modalAlertas">
         <div class="modal-box">
             <button class="close-modal" onclick="fecharModal('modalAlertas')">&times;</button>
@@ -788,18 +1041,23 @@
         </div>
     </div>
 
-    <!-- MODAL PARA APROVAÇÃO DE ALTERAÇÃO -->
     <div class="modal-overlay" id="modalAprovacaoAlteracao">
         <div class="modal-box">
             <button class="close-modal" onclick="fecharModal('modalAprovacaoAlteracao')">&times;</button>
             <h3 id="modalAprovacaoTitulo">Revisão de Alteração</h3>
-            <div id="modalAprovacaoConteudo">
-                <!-- será preenchido dinamicamente -->
-            </div>
+            <div id="modalAprovacaoConteudo"></div>
             <div class="modal-actions">
                 <button class="btn-cancelar" onclick="fecharModal('modalAprovacaoAlteracao')">Cancelar</button>
                 <button class="btn-confirmar" id="btnConfirmarAlteracao" onclick="confirmarAlteracao()">Confirmar Alteração</button>
             </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modalKPI">
+        <div class="modal-box">
+            <button class="close-modal" onclick="fecharModal('modalKPI')">&times;</button>
+            <h3 id="modalKPITitulo">Detalhes</h3>
+            <div id="modalKPIConteudo"></div>
         </div>
     </div>
 
@@ -826,9 +1084,1043 @@
             let subscription = null;
             let atualizando = false;
             let solicitacoesPendentes = [];
-
-            // Variável para guardar a solicitação em aprovação
             let solicitacaoEmAprovacao = null;
+
+            // ============================================================
+            // LISTA COMPLETA DE CBOs (TODOS OS CÓDIGOS FORNECIDOS)
+            // ============================================================
+            const listaCBO = [
+                // ===== 2011 =====
+                { codigo: "2011-05", descricao: "Bioengenheiro" },
+                { codigo: "2011-10", descricao: "Biotecnologista" },
+                { codigo: "2011-15", descricao: "Geneticista" },
+                // ===== 2030 =====
+                { codigo: "2030-05", descricao: "Pesquisador em biologia ambiental" },
+                { codigo: "2030-10", descricao: "Pesquisador em biologia animal" },
+                { codigo: "2030-15", descricao: "Pesquisador em biologia de microorganismos e parasitas" },
+                { codigo: "2030-20", descricao: "Pesquisador em biologia humana" },
+                { codigo: "2030-25", descricao: "Pesquisador em biologia vegetal" },
+                // ===== 2033 =====
+                { codigo: "2033-05", descricao: "Pesquisador de clínica médica" },
+                { codigo: "2033-10", descricao: "Pesquisador de medicina básica" },
+                { codigo: "2033-15", descricao: "Pesquisador em medicina veterinária" },
+                { codigo: "2033-20", descricao: "Pesquisador em saúde coletiva" },
+                // ===== 2111 =====
+                { codigo: "2111-05", descricao: "Atuário" },
+                { codigo: "2111-10", descricao: "Especialista em pesquisa operacional" },
+                { codigo: "2111-15", descricao: "Matemático" },
+                { codigo: "2111-20", descricao: "Matemático aplicado" },
+                // ===== 2112 =====
+                { codigo: "2112-05", descricao: "Estatístico" },
+                { codigo: "2112-10", descricao: "Estatístico (estatística aplicada)" },
+                { codigo: "2112-15", descricao: "Estatístico teórico" },
+                // ===== 2211 =====
+                { codigo: "2211-05", descricao: "Biólogo" },
+                // ===== 2212 =====
+                { codigo: "2212-05", descricao: "Biomédico" },
+                // ===== 2221 =====
+                { codigo: "2221-05", descricao: "Engenheiro agrícola" },
+                { codigo: "2221-10", descricao: "Engenheiro agrônomo" },
+                { codigo: "2221-15", descricao: "Engenheiro de pesca" },
+                { codigo: "2221-20", descricao: "Engenheiro florestal" },
+                // ===== 2222 =====
+                { codigo: "2222-05", descricao: "Engenheiro de alimentos" },
+                { codigo: "2222-15", descricao: "Tecnólogo em alimentos" },
+                // ===== 2231 =====
+                { codigo: "2231-01", descricao: "Médico acupunturista" },
+                { codigo: "2231-02", descricao: "Médico alergista e imunologista" },
+                { codigo: "2231-03", descricao: "Médico anatomopatologista" },
+                { codigo: "2231-04", descricao: "Médico anestesiologista" },
+                { codigo: "2231-05", descricao: "Médico angiologista" },
+                { codigo: "2231-06", descricao: "Médico cardiologista" },
+                { codigo: "2231-07", descricao: "Médico cirurgião cardiovascular" },
+                { codigo: "2231-08", descricao: "Médico cirurgião de cabeça e pescoço" },
+                { codigo: "2231-09", descricao: "Médico cirurgião do aparelho digestivo" },
+                { codigo: "2231-10", descricao: "Médico cirurgião geral" },
+                { codigo: "2231-11", descricao: "Médico cirurgião pediátrico" },
+                { codigo: "2231-12", descricao: "Médico cirurgião plástico" },
+                { codigo: "2231-13", descricao: "Médico cirurgião torácico" },
+                { codigo: "2231-14", descricao: "Médico citopatologista" },
+                { codigo: "2231-15", descricao: "Médico clínico" },
+                { codigo: "2231-16", descricao: "Médico de família e comunidade" },
+                { codigo: "2231-17", descricao: "Médico dermatologista" },
+                { codigo: "2231-18", descricao: "Médico do trabalho" },
+                { codigo: "2231-19", descricao: "Médico em eletroencefalografia" },
+                { codigo: "2231-20", descricao: "Médico em endoscopia" },
+                { codigo: "2231-21", descricao: "Médico em medicina de tráfego" },
+                { codigo: "2231-22", descricao: "Médico em medicina intensiva" },
+                { codigo: "2231-23", descricao: "Médico em medicina nuclear" },
+                { codigo: "2231-24", descricao: "Médico em radiologia e diagnóstico por imagem" },
+                { codigo: "2231-25", descricao: "Médico endocrinologista e metabologista" },
+                { codigo: "2231-26", descricao: "Médico fisiatra" },
+                { codigo: "2231-27", descricao: "Médico foniatra" },
+                { codigo: "2231-28", descricao: "Médico gastroenterologista" },
+                { codigo: "2231-29", descricao: "Médico generalista" },
+                { codigo: "2231-30", descricao: "Médico geneticista" },
+                { codigo: "2231-31", descricao: "Médico geriatra" },
+                { codigo: "2231-32", descricao: "Médico ginecologista e obstetra" },
+                { codigo: "2231-33", descricao: "Médico hematologista" },
+                { codigo: "2231-34", descricao: "Médico hemoterapeuta" },
+                { codigo: "2231-35", descricao: "Médico homeopata" },
+                { codigo: "2231-36", descricao: "Médico infectologista" },
+                { codigo: "2231-37", descricao: "Médico legista" },
+                { codigo: "2231-38", descricao: "Médico mastologista" },
+                { codigo: "2231-39", descricao: "Médico nefrologista" },
+                { codigo: "2231-40", descricao: "Médico neurocirurgião" },
+                { codigo: "2231-41", descricao: "Médico neurofisiologista" },
+                { codigo: "2231-42", descricao: "Médico neurologista" },
+                { codigo: "2231-43", descricao: "Médico nutrologista" },
+                { codigo: "2231-44", descricao: "Médico oftalmologista" },
+                { codigo: "2231-45", descricao: "Médico oncologista" },
+                { codigo: "2231-46", descricao: "Médico ortopedista e traumatologista" },
+                { codigo: "2231-47", descricao: "Médico otorrinolaringologista" },
+                { codigo: "2231-48", descricao: "Médico patologista clínico" },
+                { codigo: "2231-49", descricao: "Médico pediatra" },
+                { codigo: "2231-50", descricao: "Médico perito" },
+                { codigo: "2231-51", descricao: "Médico pneumologista" },
+                { codigo: "2231-52", descricao: "Médico proctologista" },
+                { codigo: "2231-53", descricao: "Médico psiquiatra" },
+                { codigo: "2231-54", descricao: "Médico radioterapeuta" },
+                { codigo: "2231-55", descricao: "Médico reumatologista" },
+                { codigo: "2231-56", descricao: "Médico sanitarista" },
+                { codigo: "2231-57", descricao: "Médico urologista" },
+                { codigo: "2231-62", descricao: "Médico da estratégia de saúde da família" },
+                // ===== 2232 =====
+                { codigo: "2232-04", descricao: "Cirurgião dentista - auditor" },
+                { codigo: "2232-08", descricao: "Cirurgião dentista - clínico geral" },
+                { codigo: "2232-12", descricao: "Cirurgião dentista - endodontista" },
+                { codigo: "2232-16", descricao: "Cirurgião dentista - epidemiologista" },
+                { codigo: "2232-20", descricao: "Cirurgião dentista - estomatologista" },
+                { codigo: "2232-24", descricao: "Cirurgião dentista - implantodontista" },
+                { codigo: "2232-28", descricao: "Cirurgião dentista - odontogeriatra" },
+                { codigo: "2232-32", descricao: "Cirurgião dentista - odontologista legal" },
+                { codigo: "2232-36", descricao: "Cirurgião dentista - odontopediatra" },
+                { codigo: "2232-40", descricao: "Cirurgião dentista - ortopedista e ortodontista" },
+                { codigo: "2232-44", descricao: "Cirurgião dentista - patologista bucal" },
+                { codigo: "2232-48", descricao: "Cirurgião dentista - periodontista" },
+                { codigo: "2232-52", descricao: "Cirurgião dentista - protesiólogo bucomaxilofacial" },
+                { codigo: "2232-56", descricao: "Cirurgião dentista - protesista" },
+                { codigo: "2232-60", descricao: "Cirurgião dentista - radiologista" },
+                { codigo: "2232-64", descricao: "Cirurgião dentista - reabilitador oral" },
+                { codigo: "2232-68", descricao: "Cirurgião dentista - traumatologista bucomaxilofacial" },
+                { codigo: "2232-72", descricao: "Cirurgião dentista de saúde coletiva" },
+                { codigo: "2232-76", descricao: "Cirurgião dentista - odontologia do trabalho" },
+                { codigo: "2232-80", descricao: "Cirurgião dentista - dentística" },
+                { codigo: "2232-84", descricao: "Cirurgião dentista - disfunção temporomandibular e dor orofacial" },
+                { codigo: "2232-88", descricao: "Cirurgião dentista - odontologia para pacientes com necessidades especiais" },
+                { codigo: "2232-93", descricao: "Cirurgião-dentista da estratégia de saúde da família" },
+                // ===== 2233 =====
+                { codigo: "2233-05", descricao: "Médico veterinário" },
+                { codigo: "2233-10", descricao: "Zootecnista" },
+                // ===== 2234 =====
+                { codigo: "2234-05", descricao: "Farmacêutico" },
+                { codigo: "2234-10", descricao: "Farmacêutico bioquímico" },
+                // ===== 2235 =====
+                { codigo: "2235-05", descricao: "Enfermeiro" },
+                { codigo: "2235-10", descricao: "Enfermeiro auditor" },
+                { codigo: "2235-15", descricao: "Enfermeiro de bordo" },
+                { codigo: "2235-20", descricao: "Enfermeiro de centro cirúrgico" },
+                { codigo: "2235-25", descricao: "Enfermeiro de terapia intensiva" },
+                { codigo: "2235-30", descricao: "Enfermeiro do trabalho" },
+                { codigo: "2235-35", descricao: "Enfermeiro nefrologista" },
+                { codigo: "2235-40", descricao: "Enfermeiro neonatologista" },
+                { codigo: "2235-45", descricao: "Enfermeiro obstétrico" },
+                { codigo: "2235-50", descricao: "Enfermeiro psiquiátrico" },
+                { codigo: "2235-55", descricao: "Enfermeiro puericultor e pediátrico" },
+                { codigo: "2235-60", descricao: "Enfermeiro sanitarista" },
+                { codigo: "2235-65", descricao: "Enfermeiro da estratégia de saúde da família" },
+                // ===== 2236 =====
+                { codigo: "2236-05", descricao: "Fisioterapeuta geral" },
+                { codigo: "2236-25", descricao: "Fisioterapeuta respiratória" },
+                { codigo: "2236-30", descricao: "Fisioterapeuta neurofuncional" },
+                { codigo: "2236-35", descricao: "Fisioterapeuta traumato-ortopédica funcional" },
+                { codigo: "2236-40", descricao: "Fisioterapeuta osteopata" },
+                { codigo: "2236-45", descricao: "Fisioterapeuta quiropraxista" },
+                { codigo: "2236-50", descricao: "Fisioterapeuta acupunturista" },
+                { codigo: "2236-55", descricao: "Fisioterapeuta esportivo" },
+                { codigo: "2236-60", descricao: "Fisioterapeuta do trabalho" },
+                // ===== 2237 =====
+                { codigo: "2237-05", descricao: "Dietista" },
+                { codigo: "2237-10", descricao: "Nutricionista" },
+                // ===== 2238 =====
+                { codigo: "2238-10", descricao: "Fonoaudiólogo" },
+                // ===== 2239 =====
+                { codigo: "2239-05", descricao: "Terapeuta ocupacional" },
+                { codigo: "2239-10", descricao: "Ortoptista" },
+                { codigo: "2239-15", descricao: "Musicoterapeuta" },
+                // ===== 2241 =====
+                { codigo: "2241-05", descricao: "Avaliador físico" },
+                { codigo: "2241-10", descricao: "Ludomotricista" },
+                { codigo: "2241-15", descricao: "Preparador de atleta" },
+                { codigo: "2241-20", descricao: "Preparador físico" },
+                { codigo: "2241-25", descricao: "Técnico de desporto individual e coletivo (exceto futebol)" },
+                { codigo: "2241-30", descricao: "Técnico de laboratório e fiscalização desportiva" },
+                { codigo: "2241-35", descricao: "Treinador profissional de futebol" },
+                // ===== 2511 =====
+                { codigo: "2511-05", descricao: "Antropólogo" },
+                { codigo: "2511-10", descricao: "Arqueólogo" },
+                { codigo: "2511-15", descricao: "Cientista político" },
+                { codigo: "2511-20", descricao: "Sociólogo" },
+                // ===== 2512 =====
+                { codigo: "2512-05", descricao: "Economista" },
+                { codigo: "2512-10", descricao: "Economista agroindustrial" },
+                { codigo: "2512-15", descricao: "Economista financeiro" },
+                { codigo: "2512-20", descricao: "Economista industrial" },
+                { codigo: "2512-25", descricao: "Economista do setor público" },
+                { codigo: "2512-30", descricao: "Economista ambiental" },
+                { codigo: "2512-35", descricao: "Economista regional e urbano" },
+                // ===== 2513 =====
+                { codigo: "2513-05", descricao: "Geógrafo" },
+                // ===== 2514 =====
+                { codigo: "2514-05", descricao: "Filósofo" },
+                // ===== 2515 =====
+                { codigo: "2515-05", descricao: "Psicólogo educacional" },
+                { codigo: "2515-10", descricao: "Psicólogo clínico" },
+                { codigo: "2515-15", descricao: "Psicólogo do esporte" },
+                { codigo: "2515-20", descricao: "Psicólogo hospitalar" },
+                { codigo: "2515-25", descricao: "Psicólogo jurídico" },
+                { codigo: "2515-30", descricao: "Psicólogo social" },
+                { codigo: "2515-35", descricao: "Psicólogo do trânsito" },
+                { codigo: "2515-40", descricao: "Psicólogo do trabalho" },
+                { codigo: "2515-45", descricao: "Neuropsicólogo" },
+                { codigo: "2515-50", descricao: "Psicanalista" },
+                { codigo: "2515-55", descricao: "Psicólogo acupunturista" },
+                // ===== 2516 =====
+                { codigo: "2516-05", descricao: "Assistente social" },
+                { codigo: "2516-10", descricao: "Economista doméstico" },
+                // ===== 2521 =====
+                { codigo: "2521-05", descricao: "Administrador" },
+                // ===== 2522 =====
+                { codigo: "2522-05", descricao: "Auditor (contadores e afins)" },
+                { codigo: "2522-10", descricao: "Contador" },
+                { codigo: "2522-15", descricao: "Perito contábil" },
+                // ===== 2523 =====
+                { codigo: "2523-05", descricao: "Secretária executiva" },
+                { codigo: "2523-10", descricao: "Secretário bilíngue" },
+                { codigo: "2523-15", descricao: "Secretária trilíngue" },
+                // ===== 2524 =====
+                { codigo: "2524-05", descricao: "Analista de recursos humanos" },
+                // ===== 2525 =====
+                { codigo: "2525-05", descricao: "Administrador de fundos e carteiras de investimento" },
+                { codigo: "2525-10", descricao: "Analista de câmbio" },
+                { codigo: "2525-15", descricao: "Analista de cobrança (instituições financeiras)" },
+                { codigo: "2525-25", descricao: "Analista de crédito (instituições financeiras)" },
+                { codigo: "2525-30", descricao: "Analista de crédito rural" },
+                { codigo: "2525-35", descricao: "Analista de leasing" },
+                { codigo: "2525-40", descricao: "Analista de produtos bancários" },
+                { codigo: "2525-45", descricao: "Analista financeiro (instituições financeiras)" },
+                // ===== 2526 =====
+                { codigo: "2526-05", descricao: "Gestor em segurança" },
+                // ===== 3001 =====
+                { codigo: "3001-05", descricao: "Técnico em mecatrônica - automação da manufatura" },
+                { codigo: "3001-10", descricao: "Técnico em mecatrônica - robótica" },
+                // ===== 3003 =====
+                { codigo: "3003-05", descricao: "Técnico em eletromecânica" },
+                // ===== 3011 =====
+                { codigo: "3011-05", descricao: "Técnico de laboratório industrial" },
+                { codigo: "3011-10", descricao: "Técnico de laboratório de análises físico-químicas (materiais de construção)" },
+                { codigo: "3011-15", descricao: "Técnico químico de petróleo" },
+                // ===== 3012 =====
+                { codigo: "3012-05", descricao: "Técnico de apoio à bioengenharia" },
+                // ===== 3111 =====
+                { codigo: "3111-05", descricao: "Técnico químico" },
+                { codigo: "3111-10", descricao: "Técnico de celulose e papel" },
+                { codigo: "3111-15", descricao: "Técnico em curtimento" },
+                // ===== 3112 =====
+                { codigo: "3112-05", descricao: "Técnico em petroquímica" },
+                // ===== 3113 =====
+                { codigo: "3113-05", descricao: "Técnico em materiais, produtos cerâmicos e vidros" },
+                // ===== 3114 =====
+                { codigo: "3114-05", descricao: "Técnico em borracha" },
+                { codigo: "3114-10", descricao: "Técnico em plástico" },
+                // ===== 3115 =====
+                { codigo: "3115-05", descricao: "Técnico de controle de meio ambiente" },
+                { codigo: "3115-10", descricao: "Técnico de meteorologia" },
+                { codigo: "3115-15", descricao: "Técnico de utilidade (produção e distribuição de vapor, gases, óleos, combustíveis, energia)" },
+                { codigo: "3115-20", descricao: "Técnico em tratamento de efluentes" },
+                // ===== 3116 =====
+                { codigo: "3116-05", descricao: "Técnico têxtil" },
+                { codigo: "3116-10", descricao: "Técnico têxtil (tratamentos químicos)" },
+                { codigo: "3116-15", descricao: "Técnico têxtil de fiação" },
+                { codigo: "3116-20", descricao: "Técnico têxtil de malharia" },
+                { codigo: "3116-25", descricao: "Técnico têxtil de tecelagem" },
+                // ===== 3117 =====
+                { codigo: "3117-05", descricao: "Colorista de papel" },
+                { codigo: "3117-10", descricao: "Colorista têxtil" },
+                { codigo: "3117-15", descricao: "Preparador de tintas" },
+                { codigo: "3117-20", descricao: "Preparador de tintas (fábrica de tecidos)" },
+                { codigo: "3117-25", descricao: "Tingidor de couros e peles" },
+                // ===== 3121 =====
+                { codigo: "3121-05", descricao: "Técnico de obras civis" },
+                // ===== 3122 =====
+                { codigo: "3122-05", descricao: "Técnico de estradas" },
+                { codigo: "3122-10", descricao: "Técnico de saneamento" },
+                // ===== 3123 =====
+                { codigo: "3123-05", descricao: "Técnico em agrimensura" },
+                { codigo: "3123-10", descricao: "Técnico em geodésia e cartografia" },
+                { codigo: "3123-15", descricao: "Técnico em hidrografia" },
+                { codigo: "3123-20", descricao: "Topógrafo" },
+                // ===== 3131 =====
+                { codigo: "3131-05", descricao: "Eletrotécnico" },
+                { codigo: "3131-10", descricao: "Eletrotécnico (produção de energia)" },
+                { codigo: "3131-15", descricao: "Eletrotécnico na fabricação, montagem e instalação de máquinas e equipamentos" },
+                { codigo: "3131-20", descricao: "Técnico de manutenção elétrica" },
+                { codigo: "3131-25", descricao: "Técnico de manutenção elétrica de máquina" },
+                { codigo: "3131-30", descricao: "Técnico eletricista" },
+                // ===== 3132 =====
+                { codigo: "3132-05", descricao: "Técnico de manutenção eletrônica" },
+                { codigo: "3132-10", descricao: "Técnico de manutenção eletrônica (circuitos de máquinas com comando numérico)" },
+                { codigo: "3132-15", descricao: "Técnico eletrônico" },
+                { codigo: "3132-20", descricao: "Técnico em manutenção de equipamentos de informática" },
+                // ===== 3133 =====
+                { codigo: "3133-05", descricao: "Técnico de comunicação de dados" },
+                { codigo: "3133-10", descricao: "Técnico de rede (telecomunicações)" },
+                { codigo: "3133-15", descricao: "Técnico de telecomunicações (telefonia)" },
+                { codigo: "3133-20", descricao: "Técnico de transmissão (telecomunicações)" },
+                // ===== 3134 =====
+                { codigo: "3134-05", descricao: "Técnico em calibração" },
+                { codigo: "3134-10", descricao: "Técnico em instrumentação" },
+                { codigo: "3134-15", descricao: "Encarregado de manutenção de instrumentos de controle, medição e similares" },
+                // ===== 3135 =====
+                { codigo: "3135-05", descricao: "Técnico em fotônica" },
+                // ===== 3141 =====
+                { codigo: "3141-05", descricao: "Técnico em mecânica de precisão" },
+                { codigo: "3141-10", descricao: "Técnico mecânico" },
+                { codigo: "3141-15", descricao: "Técnico mecânico (calefação, ventilação e refrigeração)" },
+                { codigo: "3141-20", descricao: "Técnico mecânico (máquinas)" },
+                { codigo: "3141-25", descricao: "Técnico mecânico (motores)" },
+                // ===== 3142 =====
+                { codigo: "3142-05", descricao: "Técnico mecânico na fabricação de ferramentas" },
+                { codigo: "3142-10", descricao: "Técnico mecânico na manutenção de ferramentas" },
+                // ===== 3143 =====
+                { codigo: "3143-05", descricao: "Técnico em automobilística" },
+                { codigo: "3143-10", descricao: "Técnico mecânico (aeronaves)" },
+                { codigo: "3143-15", descricao: "Técnico mecânico (embarcações)" },
+                // ===== 3144 =====
+                { codigo: "3144-05", descricao: "Técnico de manutenção de sistemas e instrumentos" },
+                { codigo: "3144-10", descricao: "Técnico em manutenção de máquinas" },
+                // ===== 3146 =====
+                { codigo: "3146-05", descricao: "Inspetor de soldagem" },
+                { codigo: "3146-10", descricao: "Técnico em caldeiraria" },
+                { codigo: "3146-15", descricao: "Técnico em estruturas metálicas" },
+                { codigo: "3146-20", descricao: "Técnico em soldagem" },
+                // ===== 3147 =====
+                { codigo: "3147-05", descricao: "Técnico de acabamento em siderurgia" },
+                { codigo: "3147-10", descricao: "Técnico de aciaria em siderurgia" },
+                { codigo: "3147-15", descricao: "Técnico de fundição em siderurgia" },
+                { codigo: "3147-20", descricao: "Técnico de laminação em siderurgia" },
+                { codigo: "3147-25", descricao: "Técnico de redução na siderurgia (primeira fusão)" },
+                { codigo: "3147-30", descricao: "Técnico de refratário em siderurgia" },
+                // ===== 3161 =====
+                { codigo: "3161-05", descricao: "Técnico em geofísica" },
+                { codigo: "3161-10", descricao: "Técnico em geologia" },
+                { codigo: "3161-15", descricao: "Técnico em geoquímica" },
+                { codigo: "3161-20", descricao: "Técnico em geotecnia" },
+                // ===== 3163 =====
+                { codigo: "3163-05", descricao: "Técnico de mineração" },
+                { codigo: "3163-10", descricao: "Técnico de mineração (óleo e petróleo)" },
+                { codigo: "3163-15", descricao: "Técnico em processamento mineral (exceto petróleo)" },
+                { codigo: "3163-20", descricao: "Técnico em pesquisa mineral" },
+                { codigo: "3163-25", descricao: "Técnico de produção em refino de petróleo" },
+                { codigo: "3163-30", descricao: "Técnico em planejamento de lavra de minas" },
+                { codigo: "3163-35", descricao: "Desincrustador (poços de petróleo)" },
+                { codigo: "3163-40", descricao: "Cimentador (poços de petróleo)" },
+                // ===== 3171 =====
+                { codigo: "3171-05", descricao: "Programador de internet" },
+                { codigo: "3171-10", descricao: "Programador de sistemas de informação" },
+                { codigo: "3171-15", descricao: "Programador de máquinas - ferramenta com comando numérico" },
+                { codigo: "3171-20", descricao: "Programador de multimídia" },
+                // ===== 3172 =====
+                { codigo: "3172-05", descricao: "Operador de computador (inclusive microcomputador)" },
+                { codigo: "3172-10", descricao: "Técnico de apoio ao usuário de informática (helpdesk)" },
+                // ===== 3180 =====
+                { codigo: "3180-05", descricao: "Desenhista técnico" },
+                { codigo: "3180-10", descricao: "Desenhista copista" },
+                { codigo: "3180-15", descricao: "Desenhista detalhista" },
+                // ===== 3181 =====
+                { codigo: "3181-05", descricao: "Desenhista técnico (arquitetura)" },
+                { codigo: "3181-10", descricao: "Desenhista técnico (cartografia)" },
+                { codigo: "3181-15", descricao: "Desenhista técnico (construção civil)" },
+                { codigo: "3181-20", descricao: "Desenhista técnico (instalações hidrossanitárias)" },
+                // ===== 3182 =====
+                { codigo: "3182-05", descricao: "Desenhista técnico mecânico" },
+                { codigo: "3182-10", descricao: "Desenhista técnico aeronáutico" },
+                { codigo: "3182-15", descricao: "Desenhista técnico naval" },
+                // ===== 3183 =====
+                { codigo: "3183-05", descricao: "Desenhista técnico (eletricidade e eletrônica)" },
+                { codigo: "3183-10", descricao: "Desenhista técnico (calefação, ventilação e refrigeração)" },
+                // ===== 3184 =====
+                { codigo: "3184-05", descricao: "Desenhista técnico (artes gráficas)" },
+                { codigo: "3184-10", descricao: "Desenhista técnico (ilustrações artísticas)" },
+                { codigo: "3184-15", descricao: "Desenhista técnico (ilustrações técnicas)" },
+                { codigo: "3184-20", descricao: "Desenhista técnico (indústria têxtil)" },
+                { codigo: "3184-25", descricao: "Desenhista técnico (mobiliário)" },
+                { codigo: "3184-30", descricao: "Desenhista técnico de embalagens, maquetes e layouts" },
+                // ===== 3185 =====
+                { codigo: "3185-05", descricao: "Desenhista projetista de arquitetura" },
+                { codigo: "3185-10", descricao: "Desenhista projetista de construção civil" },
+                // ===== 3186 =====
+                { codigo: "3186-05", descricao: "Desenhista projetista de máquinas" },
+                { codigo: "3186-10", descricao: "Desenhista projetista mecânico" },
+                // ===== 3187 =====
+                { codigo: "3187-05", descricao: "Desenhista projetista de eletricidade" },
+                { codigo: "3187-10", descricao: "Desenhista projetista eletrônico" },
+                // ===== 3188 =====
+                { codigo: "3188-05", descricao: "Projetista de móveis" },
+                { codigo: "3188-10", descricao: "Modelista de roupas" },
+                { codigo: "3188-15", descricao: "Modelista de calçados" },
+                // ===== 3191 =====
+                { codigo: "3191-05", descricao: "Técnico em calçados e artefatos de couro" },
+                { codigo: "3191-10", descricao: "Técnico em confecções do vestuário" },
+                // ===== 3192 =====
+                { codigo: "3192-05", descricao: "Técnico do mobiliário" },
+                // ===== 3201 =====
+                { codigo: "3201-05", descricao: "Técnico em bioterismo" },
+                { codigo: "3201-10", descricao: "Técnico em histologia" },
+                // ===== 3211 =====
+                { codigo: "3211-05", descricao: "Técnico agrícola" },
+                { codigo: "3211-10", descricao: "Técnico agropecuário" },
+                // ===== 3212 =====
+                { codigo: "3212-05", descricao: "Técnico em madeira" },
+                { codigo: "3212-10", descricao: "Técnico florestal" },
+                // ===== 3213 =====
+                { codigo: "3213-05", descricao: "Técnico em piscicultura" },
+                { codigo: "3213-10", descricao: "Técnico em carcinicultura" },
+                { codigo: "3213-15", descricao: "Técnico em mitilicultura" },
+                { codigo: "3213-20", descricao: "Técnico em ranicultura" },
+                // ===== 3221 =====
+                { codigo: "3221-05", descricao: "Técnico em acupuntura" },
+                { codigo: "3221-10", descricao: "Podólogo" },
+                { codigo: "3221-15", descricao: "Técnico em quiropraxia" },
+                { codigo: "3221-20", descricao: "Massoterapeuta" },
+                { codigo: "3221-25", descricao: "Terapeuta holístico" },
+                // ===== 3222 =====
+                { codigo: "3222-05", descricao: "Técnico de enfermagem" },
+                { codigo: "3222-10", descricao: "Técnico de enfermagem de terapia intensiva" },
+                { codigo: "3222-15", descricao: "Técnico de enfermagem do trabalho" },
+                { codigo: "3222-20", descricao: "Técnico de enfermagem psiquiátrica" },
+                { codigo: "3222-25", descricao: "Instrumentador cirúrgico" },
+                { codigo: "3222-30", descricao: "Auxiliar de enfermagem" },
+                { codigo: "3222-35", descricao: "Auxiliar de enfermagem do trabalho" },
+                { codigo: "3222-40", descricao: "Auxiliar de saúde (navegação marítima)" },
+                { codigo: "3222-45", descricao: "Técnico de enfermagem da estratégia de saúde da família" },
+                { codigo: "3222-50", descricao: "Auxiliar de enfermagem da estratégia de saúde da família" },
+                // ===== 3223 =====
+                { codigo: "3223-05", descricao: "Técnico em óptica e optometria" },
+                // ===== 3224 =====
+                { codigo: "3224-05", descricao: "Técnico em saúde bucal" },
+                { codigo: "3224-10", descricao: "Protético dentário" },
+                { codigo: "3224-15", descricao: "Auxiliar em saúde bucal" },
+                { codigo: "3224-20", descricao: "Auxiliar de prótese dentária" },
+                { codigo: "3224-25", descricao: "Técnico em saúde bucal da estratégia de saúde da família" },
+                { codigo: "3224-30", descricao: "Auxiliar em saúde bucal da estratégia de saúde da família" },
+                // ===== 3225 =====
+                { codigo: "3225-05", descricao: "Técnico de ortopedia" },
+                // ===== 3226 =====
+                { codigo: "3226-05", descricao: "Técnico de imobilização ortopédica" },
+                // ===== 3231 =====
+                { codigo: "3231-05", descricao: "Técnico em pecuária" },
+                // ===== 3241 =====
+                { codigo: "3241-05", descricao: "Técnico em métodos eletrográficos em encefalografia" },
+                { codigo: "3241-10", descricao: "Técnico em métodos gráficos em cardiologia" },
+                { codigo: "3241-15", descricao: "Técnico em radiologia e imagenologia" },
+                // ===== 3242 =====
+                { codigo: "3242-05", descricao: "Técnico em patologia clínica" },
+                { codigo: "3242-10", descricao: "Auxiliar técnico em patologia clínica" },
+                // ===== 3250 =====
+                { codigo: "3250-05", descricao: "Enólogo" },
+                { codigo: "3250-10", descricao: "Aromista" },
+                { codigo: "3250-15", descricao: "Perfumista" },
+                // ===== 3251 =====
+                { codigo: "3251-05", descricao: "Auxiliar técnico em laboratório de farmácia" },
+                { codigo: "3251-10", descricao: "Técnico em laboratório de farmácia" },
+                { codigo: "3251-15", descricao: "Técnico em farmácia" },
+                // ===== 3252 =====
+                { codigo: "3252-05", descricao: "Técnico de alimentos" },
+                { codigo: "3252-10", descricao: "Técnico em nutrição e dietética" },
+                // ===== 3253 =====
+                { codigo: "3253-05", descricao: "Técnico em biotecnologia" },
+                { codigo: "3253-10", descricao: "Técnico em imunobiológicos" },
+                // ===== 3281 =====
+                { codigo: "3281-05", descricao: "Embalsamador" },
+                { codigo: "3281-10", descricao: "Taxidermista" },
+                // ===== 3311 =====
+                { codigo: "3311-05", descricao: "Professor de nível médio na educação infantil" },
+                { codigo: "3311-10", descricao: "Auxiliar de desenvolvimento infantil" },
+                // ===== 3312 =====
+                { codigo: "3312-05", descricao: "Professor de nível médio no ensino fundamental" },
+                // ===== 3313 =====
+                { codigo: "3313-05", descricao: "Professor de nível médio no ensino profissionalizante" },
+                // ===== 3321 =====
+                { codigo: "3321-05", descricao: "Professor leigo no ensino fundamental" },
+                // ===== 3322 =====
+                { codigo: "3322-05", descricao: "Professor prático no ensino profissionalizante" },
+                // ===== 3331 =====
+                { codigo: "3331-05", descricao: "Instrutor de autoescola" },
+                { codigo: "3331-10", descricao: "Instrutor de cursos livres" },
+                { codigo: "3331-15", descricao: "Professores de cursos livres" },
+                // ===== 3341 =====
+                { codigo: "3341-05", descricao: "Inspetor de alunos de escola privada" },
+                { codigo: "3341-10", descricao: "Inspetor de alunos de escola pública" },
+                // ===== 3411 =====
+                { codigo: "3411-05", descricao: "Piloto comercial (exceto linhas aéreas)" },
+                { codigo: "3411-10", descricao: "Piloto comercial de helicóptero (exceto linhas aéreas)" },
+                { codigo: "3411-15", descricao: "Mecânico de voo" },
+                { codigo: "3411-20", descricao: "Piloto agrícola" },
+                // ===== 3412 =====
+                { codigo: "3412-05", descricao: "Contramestre de cabotagem" },
+                { codigo: "3412-10", descricao: "Mestre de cabotagem" },
+                { codigo: "3412-15", descricao: "Mestre fluvial" },
+                { codigo: "3412-20", descricao: "Patrão de pesca de alto-mar" },
+                { codigo: "3412-25", descricao: "Patrão de pesca na navegação interior" },
+                { codigo: "3412-30", descricao: "Piloto fluvial" },
+                // ===== 3413 =====
+                { codigo: "3413-05", descricao: "Condutor maquinista fluvial" },
+                { codigo: "3413-10", descricao: "Condutor maquinista marítimo" },
+                { codigo: "3413-15", descricao: "Eletricista de bordo" },
+                // ===== 3421 =====
+                { codigo: "3421-05", descricao: "Analista de transporte em comércio exterior" },
+                { codigo: "3421-10", descricao: "Operador de transporte multimodal" },
+                { codigo: "3421-15", descricao: "Controlador de serviços de máquinas e veículos" },
+                { codigo: "3421-20", descricao: "Afretador" },
+                { codigo: "3421-25", descricao: "Tecnólogo em logística de transporte" },
+                // ===== 3422 =====
+                { codigo: "3422-05", descricao: "Ajudante de despachante aduaneiro" },
+                { codigo: "3422-10", descricao: "Despachante aduaneiro" },
+                // ===== 3423 =====
+                { codigo: "3423-05", descricao: "Chefe de serviço de transporte rodoviário (passageiros e cargas)" },
+                { codigo: "3423-10", descricao: "Inspetor de serviços de transportes rodoviários (passageiros e cargas)" },
+                { codigo: "3423-15", descricao: "Supervisor de carga e descarga" },
+                // ===== 3424 =====
+                { codigo: "3424-05", descricao: "Agente de estação (ferrovia e metrô)" },
+                { codigo: "3424-10", descricao: "Operador de centro de controle (ferrovia e metrô)" },
+                // ===== 3425 =====
+                { codigo: "3425-05", descricao: "Controlador de tráfego aéreo" },
+                { codigo: "3425-10", descricao: "Despachante operacional de voo" },
+                { codigo: "3425-15", descricao: "Fiscal de aviação civil (FAC)" },
+                { codigo: "3425-20", descricao: "Gerente da administração de aeroportos" },
+                { codigo: "3425-25", descricao: "Gerente de empresa aérea em aeroportos" },
+                { codigo: "3425-30", descricao: "Inspetor de aviação civil" },
+                { codigo: "3425-35", descricao: "Operador de atendimento aeroviário" },
+                { codigo: "3425-40", descricao: "Supervisor da administração de aeroportos" },
+                { codigo: "3425-45", descricao: "Supervisor de empresa aérea em aeroportos" },
+                // ===== 3426 =====
+                { codigo: "3426-05", descricao: "Chefe de estação portuária" },
+                { codigo: "3426-10", descricao: "Supervisor de operações portuárias" },
+                // ===== 3511 =====
+                { codigo: "3511-05", descricao: "Técnico de contabilidade" },
+                { codigo: "3511-10", descricao: "Chefe de contabilidade (técnico)" },
+                { codigo: "3511-15", descricao: "Consultor contábil (técnico)" },
+                // ===== 3513 =====
+                { codigo: "3513-05", descricao: "Técnico em administração" },
+                { codigo: "3513-10", descricao: "Técnico em administração de comércio exterior" },
+                { codigo: "3513-15", descricao: "Agente de recrutamento e seleção" },
+                // ===== 3514 =====
+                { codigo: "3514-05", descricao: "Escrevente" },
+                { codigo: "3514-10", descricao: "Escrivão judicial" },
+                { codigo: "3514-15", descricao: "Escrivão extra-judicial" },
+                { codigo: "3514-20", descricao: "Escrivão de polícia" },
+                { codigo: "3514-25", descricao: "Oficial de justiça" },
+                { codigo: "3514-30", descricao: "Auxiliar de serviços jurídicos" },
+                // ===== 3515 =====
+                { codigo: "3515-05", descricao: "Técnico em secretariado" },
+                { codigo: "3515-10", descricao: "Taquígrafo" },
+                { codigo: "3515-15", descricao: "Estenotipista" },
+                // ===== 3516 =====
+                { codigo: "3516-05", descricao: "Técnico em segurança no trabalho" },
+                // ===== 3517 =====
+                { codigo: "3517-05", descricao: "Analista de seguros (técnico)" },
+                { codigo: "3517-10", descricao: "Analista de sinistros" },
+                { codigo: "3517-15", descricao: "Assistente comercial de seguros" },
+                { codigo: "3517-20", descricao: "Assistente técnico de seguros" },
+                { codigo: "3517-25", descricao: "Inspetor de risco" },
+                { codigo: "3517-30", descricao: "Inspetor de sinistros" },
+                { codigo: "3517-35", descricao: "Técnico de resseguros" },
+                { codigo: "3517-40", descricao: "Técnico de seguros" },
+                // ===== 3518 =====
+                { codigo: "3518-05", descricao: "Detetive profissional" },
+                { codigo: "3518-10", descricao: "Investigador de polícia" },
+                { codigo: "3518-15", descricao: "Papiloscopista policial" },
+                // ===== 3522 =====
+                { codigo: "3522-05", descricao: "Agente de defesa ambiental" },
+                { codigo: "3522-10", descricao: "Agente de saúde pública" },
+                // ===== 3523 =====
+                { codigo: "3523-05", descricao: "Metrologista" },
+                { codigo: "3523-10", descricao: "Agente fiscal de qualidade" },
+                { codigo: "3523-15", descricao: "Agente fiscal metrológico" },
+                { codigo: "3523-20", descricao: "Agente fiscal têxtil" },
+                // ===== 3524 =====
+                { codigo: "3524-05", descricao: "Agente de direitos autorais" },
+                { codigo: "3524-10", descricao: "Avaliador de produtos do meio de comunicação" },
+                { codigo: "3524-15", descricao: "Ouvidor (ombudsman) do meio de comunicação" },
+                { codigo: "3524-20", descricao: "Técnico em direitos autorais" },
+                // ===== 3532 =====
+                { codigo: "3532-05", descricao: "Técnico de operações e serviços bancários - câmbio" },
+                { codigo: "3532-10", descricao: "Técnico de operações e serviços bancários - crédito imobiliário" },
+                { codigo: "3532-15", descricao: "Técnico de operações e serviços bancários - crédito rural" },
+                { codigo: "3532-20", descricao: "Técnico de operações e serviços bancários - leasing" },
+                { codigo: "3532-25", descricao: "Técnico de operações e serviços bancários - renda fixa e variável" },
+                { codigo: "3532-30", descricao: "Tesoureiro de banco" },
+                { codigo: "3532-35", descricao: "Chefe de serviços bancários" },
+                // ===== 3541 =====
+                { codigo: "3541-10", descricao: "Agenciador de propaganda" },
+                { codigo: "3541-20", descricao: "Agente de vendas de serviços" },
+                { codigo: "3541-25", descricao: "Assistente de vendas" },
+                { codigo: "3541-30", descricao: "Promotor de vendas especializado" },
+                { codigo: "3541-35", descricao: "Técnico de vendas" },
+                { codigo: "3541-40", descricao: "Técnico em atendimento e vendas" },
+                { codigo: "3541-45", descricao: "Vendedor pracista" },
+                // ===== 3542 =====
+                { codigo: "3542-05", descricao: "Comprador" },
+                { codigo: "3542-10", descricao: "Supervisor de compras" },
+                // ===== 3543 =====
+                { codigo: "3543-05", descricao: "Analista de exportação e importação" },
+                // ===== 3544 =====
+                { codigo: "3544-05", descricao: "Leiloeiro" },
+                { codigo: "3544-10", descricao: "Avaliador de imóveis" },
+                { codigo: "3544-15", descricao: "Avaliador de bens móveis" },
+                // ===== 3545 =====
+                { codigo: "3545-05", descricao: "Corretor de seguros" },
+                // ===== 3546 =====
+                { codigo: "3546-05", descricao: "Corretor de imóveis" },
+                // ===== 3547 =====
+                { codigo: "3547-05", descricao: "Representante comercial autônomo" },
+                // ===== 3548 =====
+                { codigo: "3548-05", descricao: "Técnico em turismo" },
+                { codigo: "3548-10", descricao: "Operador de turismo" },
+                { codigo: "3548-15", descricao: "Agente de viagem" },
+                { codigo: "3548-20", descricao: "Organizador de evento" },
+                // ===== 3711 =====
+                { codigo: "3711-05", descricao: "Auxiliar de biblioteca" },
+                { codigo: "3711-10", descricao: "Técnico em biblioteconomia" },
+                // ===== 3712 =====
+                { codigo: "3712-05", descricao: "Colecionador de selos e moedas" },
+                { codigo: "3712-10", descricao: "Técnico em museologia" },
+                // ===== 3713 =====
+                { codigo: "3713-05", descricao: "Técnico em programação visual" },
+                { codigo: "3713-10", descricao: "Técnico gráfico" },
+                // ===== 3714 =====
+                { codigo: "3714-05", descricao: "Recreador de acantonamento" },
+                { codigo: "3714-10", descricao: "Recreador" },
+                // ===== 3721 =====
+                { codigo: "3721-05", descricao: "Diretor de fotografia" },
+                { codigo: "3721-10", descricao: "Iluminador (televisão)" },
+                { codigo: "3721-15", descricao: "Operador de câmera de televisão" },
+                // ===== 3722 =====
+                { codigo: "3722-05", descricao: "Operador de rede de teleprocessamento" },
+                { codigo: "3722-10", descricao: "Radiotelegrafista" },
+                // ===== 3731 =====
+                { codigo: "3731-05", descricao: "Operador de áudio de continuidade (rádio)" },
+                { codigo: "3731-10", descricao: "Operador de central de rádio" },
+                { codigo: "3731-15", descricao: "Operador de externa (rádio)" },
+                { codigo: "3731-20", descricao: "Operador de gravação de rádio" },
+                { codigo: "3731-25", descricao: "Operador de transmissor de rádio" },
+                // ===== 3732 =====
+                { codigo: "3732-05", descricao: "Técnico em operação de equipamentos de produção para televisão e produtoras de vídeo" },
+                { codigo: "3732-10", descricao: "Técnico em operação de equipamento de exibição de televisão" },
+                { codigo: "3732-15", descricao: "Técnico em operação de equipamentos de transmissão/recepção de televisão" },
+                { codigo: "3732-20", descricao: "Supervisor técnico operacional de sistemas de televisão e produtoras de vídeo" },
+                // ===== 3741 =====
+                { codigo: "3741-05", descricao: "Técnico em gravação de áudio" },
+                { codigo: "3741-10", descricao: "Técnico em instalação de equipamentos de áudio" },
+                { codigo: "3741-15", descricao: "Técnico em masterização de áudio" },
+                { codigo: "3741-20", descricao: "Projetista de som" },
+                { codigo: "3741-25", descricao: "Técnico em sonorização" },
+                { codigo: "3741-30", descricao: "Técnico em mixagem de áudio" },
+                { codigo: "3741-35", descricao: "Projetista de sistemas de áudio" },
+                { codigo: "3741-40", descricao: "Microfonista" },
+                // ===== 3742 =====
+                { codigo: "3742-05", descricao: "Cenotécnico (cinema, vídeo, televisão, teatro e espetáculos)" },
+                { codigo: "3742-10", descricao: "Maquinista de cinema e vídeo" },
+                { codigo: "3742-15", descricao: "Maquinista de teatro e espetáculos" },
+                // ===== 3743 =====
+                { codigo: "3743-05", descricao: "Operador de projetor cinematográfico" },
+                { codigo: "3743-10", descricao: "Operador-mantenedor de projetor cinematográfico" },
+                // ===== 3744 =====
+                { codigo: "3744-05", descricao: "Editor de TV e vídeo" },
+                { codigo: "3744-10", descricao: "Finalizador de filmes" },
+                { codigo: "3744-15", descricao: "Finalizador de vídeo" },
+                { codigo: "3744-20", descricao: "Montador de filmes" },
+                // ===== 3751 =====
+                { codigo: "3751-05", descricao: "Designer de interiores" },
+                { codigo: "3751-10", descricao: "Designer de vitrines" },
+                { codigo: "3751-15", descricao: "Visual merchandiser" },
+                // ===== 3761 =====
+                { codigo: "3761-05", descricao: "Dançarino tradicional" },
+                { codigo: "3761-10", descricao: "Dançarino popular" },
+                // ===== 3762 =====
+                { codigo: "3762-05", descricao: "Acrobata" },
+                { codigo: "3762-10", descricao: "Artista aéreo" },
+                { codigo: "3762-15", descricao: "Artista de circo (outros)" },
+                { codigo: "3762-20", descricao: "Contorcionista" },
+                { codigo: "3762-25", descricao: "Domador de animais (circense)" },
+                { codigo: "3762-30", descricao: "Equilibrista" },
+                { codigo: "3762-35", descricao: "Mágico" },
+                { codigo: "3762-40", descricao: "Malabarista" },
+                { codigo: "3762-45", descricao: "Palhaço" },
+                { codigo: "3762-50", descricao: "Titeriteiro" },
+                { codigo: "3762-55", descricao: "Trapezista" },
+                // ===== 3763 =====
+                { codigo: "3763-05", descricao: "Apresentador de eventos" },
+                { codigo: "3763-10", descricao: "Apresentador de festas populares" },
+                { codigo: "3763-15", descricao: "Apresentador de programas de rádio" },
+                { codigo: "3763-20", descricao: "Apresentador de programas de televisão" },
+                { codigo: "3763-25", descricao: "Apresentador de circo" },
+                // ===== 3764 =====
+                { codigo: "3764-05", descricao: "Modelo artístico" },
+                { codigo: "3764-10", descricao: "Modelo de modas" },
+                { codigo: "3764-15", descricao: "Modelo publicitário" },
+                // ===== 3771 =====
+                { codigo: "3771-05", descricao: "Atleta profissional (outras modalidades)" },
+                { codigo: "3771-10", descricao: "Atleta profissional de futebol" },
+                { codigo: "3771-15", descricao: "Atleta profissional de golfe" },
+                { codigo: "3771-20", descricao: "Atleta profissional de luta" },
+                { codigo: "3771-25", descricao: "Atleta profissional de tênis" },
+                { codigo: "3771-30", descricao: "Jóquei" },
+                { codigo: "3771-35", descricao: "Piloto de competição automobilística" },
+                { codigo: "3771-40", descricao: "Profissional de atletismo" },
+                { codigo: "3771-45", descricao: "Pugilista" },
+                // ===== 3772 =====
+                { codigo: "3772-05", descricao: "Árbitro desportivo" },
+                { codigo: "3772-10", descricao: "Árbitro de atletismo" },
+                { codigo: "3772-15", descricao: "Árbitro de basquete" },
+                { codigo: "3772-20", descricao: "Árbitro de futebol" },
+                { codigo: "3772-25", descricao: "Árbitro de futebol de salão" },
+                { codigo: "3772-30", descricao: "Árbitro de judô" },
+                { codigo: "3772-35", descricao: "Árbitro de karatê" },
+                { codigo: "3772-40", descricao: "Árbitro de polo aquático" },
+                { codigo: "3772-45", descricao: "Árbitro de vôlei" },
+                // ===== 3911 =====
+                { codigo: "3911-05", descricao: "Cronoanalista" },
+                { codigo: "3911-10", descricao: "Cronometrista" },
+                { codigo: "3911-15", descricao: "Controlador de entrada e saída" },
+                { codigo: "3911-20", descricao: "Planejista" },
+                { codigo: "3911-25", descricao: "Técnico de planejamento de produção" },
+                { codigo: "3911-30", descricao: "Técnico de planejamento e programação da manutenção" },
+                { codigo: "3911-35", descricao: "Técnico de matéria-prima e material" },
+                // ===== 3912 =====
+                { codigo: "3912-05", descricao: "Inspetor de qualidade" },
+                { codigo: "3912-10", descricao: "Técnico de garantia da qualidade" },
+                { codigo: "3912-15", descricao: "Operador de inspeção de qualidade" },
+                { codigo: "3912-20", descricao: "Técnico de painel de controle" },
+                { codigo: "3912-25", descricao: "Escolhedor de papel" },
+                { codigo: "3912-30", descricao: "Técnico operacional de serviços de correios" },
+                // ===== 3951 =====
+                { codigo: "3951-05", descricao: "Técnico de apoio em pesquisa e desenvolvimento (exceto agropecuário e florestal)" },
+                { codigo: "3951-10", descricao: "Técnico de apoio em pesquisa e desenvolvimento agropecuário florestal" },
+                // ===== 4101 =====
+                { codigo: "4101-05", descricao: "Supervisor administrativo" },
+                // ===== 4102 =====
+                { codigo: "4102-05", descricao: "Supervisor de almoxarifado" },
+                { codigo: "4102-10", descricao: "Supervisor de câmbio" },
+                { codigo: "4102-15", descricao: "Supervisor de contas a pagar" },
+                { codigo: "4102-20", descricao: "Supervisor de controle patrimonial" },
+                { codigo: "4102-25", descricao: "Supervisor de crédito e cobrança" },
+                { codigo: "4102-30", descricao: "Supervisor de orçamento" },
+                { codigo: "4102-35", descricao: "Supervisor de tesouraria" },
+                // ===== 4110 =====
+                { codigo: "4110-05", descricao: "Auxiliar de escritório em geral" },
+                { codigo: "4110-10", descricao: "Assistente administrativo" },
+                { codigo: "4110-15", descricao: "Atendente de judiciário" },
+                { codigo: "4110-20", descricao: "Auxiliar de judiciário" },
+                { codigo: "4110-25", descricao: "Auxiliar de cartório" },
+                { codigo: "4110-30", descricao: "Auxiliar de pessoal" },
+                { codigo: "4110-35", descricao: "Auxiliar de estatística" },
+                { codigo: "4110-40", descricao: "Auxiliar de seguros" },
+                { codigo: "4110-45", descricao: "Auxiliar de serviços de importação e exportação" },
+                { codigo: "4110-50", descricao: "Agente de microcrédito" },
+                // ===== 4121 =====
+                { codigo: "4121-05", descricao: "Datilógrafo" },
+                { codigo: "4121-10", descricao: "Digitador" },
+                { codigo: "4121-15", descricao: "Operador de mensagens de telecomunicações (Correios)" },
+                { codigo: "4121-20", descricao: "Supervisor de digitação e operação" },
+                // ===== 4122 =====
+                { codigo: "4122-05", descricao: "Contínuo" },
+                // ===== 4131 =====
+                { codigo: "4131-05", descricao: "Analista de folha de pagamento" },
+                { codigo: "4131-10", descricao: "Auxiliar de contabilidade" },
+                { codigo: "4131-15", descricao: "Auxiliar de faturamento" },
+                // ===== 4132 =====
+                { codigo: "4132-05", descricao: "Atendente de agência" },
+                { codigo: "4132-10", descricao: "Caixa de banco" },
+                { codigo: "4132-15", descricao: "Compensador de banco" },
+                { codigo: "4132-20", descricao: "Conferente de serviços bancários" },
+                { codigo: "4132-25", descricao: "Escriturário de banco" },
+                { codigo: "4132-30", descricao: "Operador de cobrança bancária" },
+                // ===== 4141 =====
+                { codigo: "4141-05", descricao: "Almoxarife" },
+                { codigo: "4141-10", descricao: "Armazenista" },
+                { codigo: "4141-15", descricao: "Balanceiro" },
+                // ===== 4142 =====
+                { codigo: "4142-05", descricao: "Apontador de mão-de-obra" },
+                { codigo: "4142-10", descricao: "Apontador de produção" },
+                { codigo: "4142-15", descricao: "Conferente de carga e descarga" },
+                // ===== 4151 =====
+                { codigo: "4151-05", descricao: "Arquivista de documentos" },
+                { codigo: "4151-15", descricao: "Codificador de dados" },
+                { codigo: "4151-20", descricao: "Fitotecário" },
+                { codigo: "4151-25", descricao: "Kardexista" },
+                { codigo: "4151-30", descricao: "Operador de máquina copiadora (exceto operador de gráfica rápida)" },
+                // ===== 4152 =====
+                { codigo: "4152-05", descricao: "Carteiro" },
+                { codigo: "4152-10", descricao: "Operador de triagem e transbordo" },
+                // ===== 4201 =====
+                { codigo: "4201-05", descricao: "Supervisor de caixas e bilheteiros (exceto caixa de banco)" },
+                { codigo: "4201-10", descricao: "Supervisor de cobrança" },
+                { codigo: "4201-15", descricao: "Supervisor de coletadores de apostas e de jogos" },
+                { codigo: "4201-20", descricao: "Supervisor de entrevistadores e recenseadores" },
+                { codigo: "4201-25", descricao: "Supervisor de recepcionistas" },
+                { codigo: "4201-30", descricao: "Supervisor de telefonistas" },
+                { codigo: "4201-35", descricao: "Supervisor de telemarketing e atendimento" },
+                // ===== 4211 =====
+                { codigo: "4211-05", descricao: "Atendente comercial (agência postal)" },
+                { codigo: "4211-10", descricao: "Bilheteiro de transportes coletivos" },
+                { codigo: "4211-15", descricao: "Bilheteiro no serviço de diversões" },
+                { codigo: "4211-20", descricao: "Emissor de passagens" },
+                { codigo: "4211-25", descricao: "Operador de caixa" },
+                // ===== 4212 =====
+                { codigo: "4212-05", descricao: "Recebedor de apostas (loteria)" },
+                { codigo: "4212-10", descricao: "Recebedor de apostas (turfe)" },
+                // ===== 4213 =====
+                { codigo: "4213-05", descricao: "Cobrador externo" },
+                { codigo: "4213-10", descricao: "Cobrador interno" },
+                { codigo: "4213-15", descricao: "Localizador (cobrador)" },
+                // ===== 4221 =====
+                { codigo: "4221-05", descricao: "Recepcionista em geral" },
+                { codigo: "4221-10", descricao: "Recepcionista de consultório médico ou dentário" },
+                { codigo: "4221-15", descricao: "Recepcionista de seguro saúde" },
+                { codigo: "4221-20", descricao: "Recepcionista de hotel" },
+                { codigo: "4221-25", descricao: "Recepcionista de banco" },
+                // ===== 4222 =====
+                { codigo: "4222-05", descricao: "Telefonista" },
+                { codigo: "4222-10", descricao: "Teleoperador" },
+                { codigo: "4222-15", descricao: "Monitor de teleatendimento" },
+                { codigo: "4222-20", descricao: "Operador de radiochamada" },
+                // ===== 4223 =====
+                { codigo: "4223-05", descricao: "Operador de telemarketing ativo" },
+                { codigo: "4223-10", descricao: "Operador de telemarketing ativo e receptivo" },
+                { codigo: "4223-15", descricao: "Operador de telemarketing receptivo" },
+                { codigo: "4223-20", descricao: "Operador de telemarketing técnico" },
+                // ===== 4231 =====
+                { codigo: "4231-05", descricao: "Despachante documentalista" },
+                { codigo: "4231-10", descricao: "Despachante de trânsito" },
+                // ===== 4241 =====
+                { codigo: "4241-05", descricao: "Entrevistador censitário e de pesquisas amostrais" },
+                { codigo: "4241-10", descricao: "Entrevistador de pesquisa de opinião e mídia" },
+                { codigo: "4241-15", descricao: "Entrevistador de pesquisas de mercado" },
+                { codigo: "4241-20", descricao: "Entrevistador de preços" },
+                { codigo: "4241-25", descricao: "Escriturário em estatística" },
+                // ===== 5101 =====
+                { codigo: "5101-05", descricao: "Supervisor de transportes" },
+                { codigo: "5101-10", descricao: "Administrador de edifícios" },
+                { codigo: "5101-15", descricao: "Supervisor de andar" },
+                { codigo: "5101-20", descricao: "Chefe de portaria de hotel" },
+                { codigo: "5101-30", descricao: "Chefe de bar" },
+                { codigo: "5101-35", descricao: "Maître" },
+                // ===== 5102 =====
+                { codigo: "5102-05", descricao: "Supervisor de lavanderia" },
+                // ===== 5103 =====
+                { codigo: "5103-05", descricao: "Supervisor de bombeiros" },
+                { codigo: "5103-10", descricao: "Supervisor de vigilantes" },
+                // ===== 5111 =====
+                { codigo: "5111-05", descricao: "Comissário de voo" },
+                { codigo: "5111-10", descricao: "Comissário de trem" },
+                { codigo: "5111-15", descricao: "Taifeiro (exceto militares)" },
+                // ===== 5112 =====
+                { codigo: "5112-05", descricao: "Fiscal de transportes coletivos (exceto trem)" },
+                { codigo: "5112-10", descricao: "Despachante de transportes coletivos (exceto trem)" },
+                { codigo: "5112-15", descricao: "Cobrador de transportes coletivos (exceto trem)" },
+                { codigo: "5112-20", descricao: "Bilheteiro (estações de metrô, ferroviárias e assemelhadas)" },
+                // ===== 5114 =====
+                { codigo: "5114-05", descricao: "Guia de turismo" },
+                // ===== 5121 =====
+                { codigo: "5121-05", descricao: "Empregado doméstico nos serviços gerais" },
+                { codigo: "5121-10", descricao: "Empregado doméstico arrumador" },
+                { codigo: "5121-15", descricao: "Empregado doméstico faxineiro" },
+                { codigo: "5121-20", descricao: "Empregado doméstico diarista" },
+                // ===== 5131 =====
+                { codigo: "5131-05", descricao: "Mordomo de residência" },
+                { codigo: "5131-10", descricao: "Mordomo de hotelaria" },
+                { codigo: "5131-15", descricao: "Governanta de hotelaria" },
+                // ===== 5132 =====
+                { codigo: "5132-05", descricao: "Cozinheiro geral" },
+                { codigo: "5132-10", descricao: "Cozinheiro do serviço doméstico" },
+                { codigo: "5132-15", descricao: "Cozinheiro industrial" },
+                { codigo: "5132-20", descricao: "Cozinheiro de hospital" },
+                { codigo: "5132-25", descricao: "Cozinheiro de embarcações" },
+                // ===== 5133 =====
+                { codigo: "5133-05", descricao: "Camareiro de teatro" },
+                { codigo: "5133-10", descricao: "Camareiro de televisão" },
+                { codigo: "5133-15", descricao: "Camareiro de hotel" },
+                { codigo: "5133-20", descricao: "Camareiro de embarcações" },
+                { codigo: "5133-25", descricao: "Guarda-roupeiro de cinema" },
+                // ===== 5134 =====
+                { codigo: "5134-05", descricao: "Garçom" },
+                { codigo: "5134-10", descricao: "Garçom (serviços de vinhos)" },
+                { codigo: "5134-15", descricao: "Cumim" },
+                { codigo: "5134-20", descricao: "Barman" },
+                { codigo: "5134-25", descricao: "Copeiro" },
+                { codigo: "5134-30", descricao: "Copeiro de hospital" },
+                { codigo: "5134-35", descricao: "Atendente de lanchonete" },
+                // ===== 5135 =====
+                { codigo: "5135-05", descricao: "Auxiliar nos serviços de alimentação" },
+                // ===== 5136 =====
+                { codigo: "5136-05", descricao: "Churrasqueiro" },
+                { codigo: "5136-10", descricao: "Pizzaiolo" },
+                { codigo: "5136-15", descricao: "Sushiman" },
+                // ===== 5141 =====
+                { codigo: "5141-05", descricao: "Ascensorista" },
+                { codigo: "5141-10", descricao: "Garagista" },
+                { codigo: "5141-15", descricao: "Sacristão" },
+                { codigo: "5141-20", descricao: "Zelador de edifício" },
+                // ===== 5142 =====
+                { codigo: "5142-05", descricao: "Coletor de lixo domiciliar" },
+                { codigo: "5142-15", descricao: "Varredor de rua" },
+                { codigo: "5142-25", descricao: "Trabalhador de serviços de limpeza e conservação de áreas públicas" },
+                { codigo: "5142-30", descricao: "Coletor de resíduos sólidos de serviços de saúde" },
+                // ===== 5143 =====
+                { codigo: "5143-05", descricao: "Limpador de vidros" },
+                { codigo: "5143-10", descricao: "Auxiliar de manutenção predial" },
+                { codigo: "5143-15", descricao: "Limpador de fachadas" },
+                { codigo: "5143-20", descricao: "Faxineiro" },
+                { codigo: "5143-25", descricao: "Trabalhador da manutenção de edificações" },
+                { codigo: "5143-30", descricao: "Limpador de piscinas" },
+                // ===== 5151 =====
+                { codigo: "5151-05", descricao: "Agente comunitário de saúde" },
+                { codigo: "5151-10", descricao: "Atendente de enfermagem" },
+                { codigo: "5151-15", descricao: "Parteira leiga" },
+                { codigo: "5151-20", descricao: "Visitador sanitário" },
+                { codigo: "5151-25", descricao: "Agente indígena de saúde" },
+                { codigo: "5151-30", descricao: "Agente indígena de saneamento" },
+                // ===== 5152 =====
+                { codigo: "5152-05", descricao: "Auxiliar de banco de sangue" },
+                { codigo: "5152-10", descricao: "Auxiliar de farmácia de manipulação" },
+                { codigo: "5152-15", descricao: "Auxiliar de laboratório de análises clínicas" },
+                { codigo: "5152-20", descricao: "Auxiliar de laboratório de imunobiológicos" },
+                { codigo: "5152-25", descricao: "Auxiliar de produção farmacêutica" },
+                // ===== 5153 =====
+                { codigo: "5153-05", descricao: "Educador social" },
+                { codigo: "5153-10", descricao: "Agente de ação social" },
+                { codigo: "5153-15", descricao: "Monitor de dependente químico" },
+                { codigo: "5153-20", descricao: "Conselheiro tutelar" },
+                // ===== 5161 =====
+                { codigo: "5161-05", descricao: "Barbeiro" },
+                { codigo: "5161-10", descricao: "Cabeleireiro" },
+                { codigo: "5161-15", descricao: "Esteticista" },
+                { codigo: "5161-20", descricao: "Manicure" },
+                { codigo: "5161-25", descricao: "Maquiador" },
+                { codigo: "5161-30", descricao: "Maquiador de caracterização" },
+                { codigo: "5161-40", descricao: "Pedicure" },
+                // ===== 5162 =====
+                { codigo: "5162-05", descricao: "Babá" },
+                { codigo: "5162-10", descricao: "Cuidador de idosos" },
+                { codigo: "5162-15", descricao: "Mãe social" },
+                // ===== 5163 =====
+                { codigo: "5163-05", descricao: "Lavadeiro em geral" },
+                { codigo: "5163-10", descricao: "Lavador de roupas à máquina" },
+                { codigo: "5163-15", descricao: "Lavador de artefatos de tapeçaria" },
+                { codigo: "5163-20", descricao: "Limpador a seco, à máquina" },
+                { codigo: "5163-25", descricao: "Passador de roupas em geral" },
+                { codigo: "5163-30", descricao: "Tingidor de roupas" },
+                { codigo: "5163-35", descricao: "Conferente-expedidor de roupas (lavanderias)" },
+                { codigo: "5163-40", descricao: "Atendente de lavanderia" },
+                { codigo: "5163-45", descricao: "Auxiliar de lavanderia" },
+                // ===== 5164 =====
+                { codigo: "5164-05", descricao: "Lavador de roupas" },
+                { codigo: "5164-10", descricao: "Limpador de roupas a seco, à mão" },
+                { codigo: "5164-15", descricao: "Passador de roupas, à mão" },
+                // ===== 5165 =====
+                { codigo: "5165-05", descricao: "Agente funerário" },
+                // ===== 5166 =====
+                { codigo: "5166-05", descricao: "Operador de forno (serviços funerários)" },
+                { codigo: "5166-10", descricao: "Sepultador" },
+                // ===== 5167 =====
+                { codigo: "5167-05", descricao: "Astrólogo" },
+                { codigo: "5167-10", descricao: "Numerólogo" },
+                // ===== 5168 =====
+                { codigo: "5168-05", descricao: "Esotérico" },
+                { codigo: "5168-10", descricao: "Paranormal" },
+                // ===== 5171 =====
+                { codigo: "5171-05", descricao: "Bombeiro de aeródromo" },
+                { codigo: "5171-10", descricao: "Bombeiro de segurança do trabalho" },
+                { codigo: "5171-15", descricao: "Salva-vidas" },
+                // ===== 5172 =====
+                { codigo: "5172-05", descricao: "Agente de Polícia Federal" },
+                { codigo: "5172-10", descricao: "Policial rodoviário federal" },
+                { codigo: "5172-15", descricao: "Guarda-civil municipal" },
+                { codigo: "5172-20", descricao: "Agente de trânsito" },
+                // ===== 5173 =====
+                { codigo: "5173-05", descricao: "Agente de proteção de aeroporto" },
+                { codigo: "5173-10", descricao: "Agente de segurança" },
+                { codigo: "5173-15", descricao: "Agente de segurança penitenciária" },
+                { codigo: "5173-20", descricao: "Vigia florestal" },
+                { codigo: "5173-25", descricao: "Vigia portuário" },
+                { codigo: "5173-30", descricao: "Vigilante" },
+                { codigo: "5173-35", descricao: "Guarda portuário" },
+                // ===== 5174 =====
+                { codigo: "5174-05", descricao: "Porteiro (hotel)" },
+                { codigo: "5174-10", descricao: "Porteiro de edifícios" },
+                { codigo: "5174-15", descricao: "Porteiro de locais de diversão" },
+                { codigo: "5174-20", descricao: "Vigia" },
+                // ===== 5191 =====
+                { codigo: "5191-05", descricao: "Ciclista mensageiro" },
+                { codigo: "5191-10", descricao: "Motociclista no transporte de documentos e pequenos volumes" },
+                // ===== 5192 =====
+                { codigo: "5192-05", descricao: "Catador de material reciclável" },
+                // ===== 5193 =====
+                { codigo: "5193-05", descricao: "Auxiliar de veterinário" },
+                { codigo: "5193-10", descricao: "Esteticista de animais domésticos" },
+                { codigo: "5193-15", descricao: "Banhista de animais domésticos" },
+                { codigo: "5193-20", descricao: "Tosador de animais domésticos" },
+                // ===== 5198 =====
+                { codigo: "5198-05", descricao: "Profissional do sexo" },
+                // ===== 5199 =====
+                { codigo: "5199-05", descricao: "Cartazeiro" },
+                { codigo: "5199-10", descricao: "Controlador de Pragas" },
+                { codigo: "5199-15", descricao: "Engraxate" },
+                { codigo: "5199-20", descricao: "Gandula" },
+                { codigo: "5199-25", descricao: "Guardador de veículos" },
+                { codigo: "5199-30", descricao: "Lavador de garrafas, vidros e outros utensílios" },
+                { codigo: "5199-35", descricao: "Lavador de veículos" },
+                { codigo: "5199-40", descricao: "Leiturista" },
+                { codigo: "5199-45", descricao: "Recepcionista de casas de espetáculos" },
+                // ===== 5201 =====
+                { codigo: "5201-05", descricao: "Supervisor de vendas de serviços" },
+                { codigo: "5201-10", descricao: "Supervisor de vendas comercial" },
+                // ===== 5211 =====
+                { codigo: "5211-05", descricao: "Vendedor em comércio atacadista" },
+                { codigo: "5211-10", descricao: "Vendedor de comércio varejista" },
+                { codigo: "5211-15", descricao: "Promotor de vendas" },
+                { codigo: "5211-20", descricao: "Demonstrador de mercadorias" },
+                { codigo: "5211-25", descricao: "Repositor de mercadorias" },
+                { codigo: "5211-30", descricao: "Atendente de farmácia - balconista" },
+                { codigo: "5211-35", descricao: "Frentista" },
+                // ===== 5231 =====
+                { codigo: "5231-05", descricao: "Instalador de cortinas e persianas, portas sanfonadas e boxes" },
+                { codigo: "5231-10", descricao: "Instalador de som e acessórios de veículos" },
+                { codigo: "5231-15", descricao: "Chaveiro" },
+                // ===== 5241 =====
+                { codigo: "5241-05", descricao: "Vendedor em domicílio" },
+                // ===== 5242 =====
+                { codigo: "5242-05", descricao: "Feirante" },
+                { codigo: "5242-10", descricao: "Jornaleiro (em banca de jornal)" },
+                { codigo: "5242-15", descricao: "Vendedor permissionário" },
+                // ===== 5243 =====
+                { codigo: "5243-05", descricao: "Vendedor ambulante" },
+                { codigo: "5243-10", descricao: "Pipoqueiro ambulante" }
+            ];
+
+            // ============================================================
+            // OPÇÕES DE VÍNCULO (COMPLETO)
+            // ============================================================
+            const opcoesVinculo = [
+                "Estatutário",
+                "Contrato",
+                "CLT",
+                "Temporário",
+                "Autônomo",
+                "Outros"
+            ];
 
             // ============================================================
             // DIAGNÓSTICO
@@ -893,27 +2185,20 @@
                 try {
                     const { error } = await supabaseClient.from('solicitacoes').select('id').limit(1);
                     if (error && error.code === '42P01') {
-                        console.warn('Tabela solicitacoes não existe. Crie-a manualmente no SQL Editor.');
+                        console.warn('Tabela solicitacoes não existe.');
                         alert('A tabela "solicitacoes" não existe. Por favor, crie-a manualmente no SQL Editor do Supabase.');
-                    } else if (error) {
-                        console.error('Erro ao verificar tabela solicitacoes:', error);
-                    } else {
-                        console.log('Tabela solicitacoes existe.');
                     }
-                } catch (e) {
-                    console.warn('Erro ao verificar tabela solicitacoes:', e);
-                }
+                } catch (e) { console.warn(e); }
             }
 
             // ============================================================
-            // REALTIME SUBSCRIPTION
+            // REALTIME
             // ============================================================
             function iniciarRealtime() {
                 if (subscription) {
                     subscription.unsubscribe();
                     subscription = null;
                 }
-
                 const channel = supabaseClient
                     .channel('db-changes')
                     .on('postgres_changes', { event: '*', schema: 'public', table: 'profissionais' }, () =>
@@ -927,11 +2212,9 @@
                             console.log('Realtime ativo');
                             setPasso(document.getElementById('passo4'), 'ok', 'Realtime ativo');
                         } else {
-                            console.warn('Realtime status:', status);
                             setPasso(document.getElementById('passo4'), 'erro', 'Falha no Realtime');
                         }
                     });
-
                 subscription = channel;
             }
 
@@ -945,9 +2228,6 @@
                 }, 500);
             }
 
-            // ============================================================
-            // RECARGA FORÇADA (botão)
-            // ============================================================
             window.forcarRecarga = async function() {
                 await recarregarDadosRealtime();
                 alert('✅ Dados recarregados manualmente.');
@@ -957,7 +2237,6 @@
                 if (atualizando) return;
                 atualizando = true;
                 setStatus(true, 'Atualizando...', true);
-
                 try {
                     const { data: unid, error: e1 } = await supabaseClient
                         .from('unidades_saude')
@@ -975,12 +2254,9 @@
 
                     await carregarSolicitacoes();
 
-                    // Atualizar select de unidades
                     const select = document.getElementById('selecionarUnidade');
                     const valorSelecionado = select.value;
-                    while (select.options.length > 1) {
-                        select.remove(1);
-                    }
+                    while (select.options.length > 1) select.remove(1);
                     todasUnidades.forEach(u => {
                         const opt = document.createElement('option');
                         opt.value = u.cnes;
@@ -988,7 +2264,6 @@
                         select.appendChild(opt);
                     });
                     todasOpcoesSelect = Array.from(select.options);
-
                     if (valorSelecionado !== '__todos__' && todasUnidades.some(u => u.cnes === valorSelecionado)) {
                         select.value = valorSelecionado;
                     } else {
@@ -1008,9 +2283,13 @@
                         profissionaisFiltrados = profissionaisFiltrados.filter(p =>
                             (p.nome_profissional && p.nome_profissional.toLowerCase().includes(buscaGlobal
                             .toLowerCase())) ||
-                            (p.cpf && p.cpf.includes(buscaGlobal))
+                            (p.cpf && p.cpf.includes(buscaGlobal)) ||
+                            (p.cbo && listaCBO.some(cbo =>
+                                cbo.codigo === p.cbo && cbo.descricao.toLowerCase().includes(buscaGlobal.toLowerCase())
+                            ))
                         );
                     }
+                    profissionaisFiltrados = aplicarFiltroEspecialidade(profissionaisFiltrados);
 
                     await atualizarDashboard();
                     renderizarTabelaProfissionais(profissionaisFiltrados);
@@ -1030,16 +2309,20 @@
                             document.getElementById('cargoResponsavel').value = unidade.cargo_responsavel || '';
                             document.getElementById('dataEmissao').value = unidade.data_emissao || '';
                             document.getElementById('dataPreenchimento').value = unidade.data_preenchimento || '';
+                            document.getElementById('fichaCnes').textContent = unidade.cnes || '--';
+                            document.getElementById('fichaNomeUnidade').textContent = unidade.nome_unidade || '--';
                         }
                     } else {
                         limparDadosUnidade();
+                        document.getElementById('fichaCnes').textContent = '--';
+                        document.getElementById('fichaNomeUnidade').textContent = '--';
                     }
 
+                    atualizarFichaImpressao();
                     setStatus(true, 'Atualizado!');
                 } catch (e) {
-                    console.error('Erro ao recarregar dados em tempo real:', e);
-                    setStatus(false, 'Erro na atualização: ' + e.message);
-                    alert('❌ Erro ao recarregar: ' + e.message);
+                    console.error(e);
+                    setStatus(false, 'Erro: ' + e.message);
                 } finally {
                     atualizando = false;
                     if (timeoutRealtime) {
@@ -1058,7 +2341,6 @@
                     if (!lib) throw new Error('Biblioteca não carregada');
                     supabaseClient = lib.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
                 }
-
                 const { data: unid, error: e1 } = await supabaseClient
                     .from('unidades_saude')
                     .select('*')
@@ -1084,7 +2366,6 @@
                     select.appendChild(opt);
                 });
                 todasOpcoesSelect = Array.from(select.options);
-
                 document.getElementById('buscaUnidade').value = '';
                 unidadeSelecionada = null;
                 profissionaisFiltrados = [...todosProfissionais];
@@ -1092,10 +2373,48 @@
                 renderizarTabelaProfissionais(profissionaisFiltrados);
                 limparDadosUnidade();
                 document.getElementById('totalEncontrados').textContent = profissionaisFiltrados.length + ' encontrados';
+                document.getElementById('fichaCnes').textContent = '--';
+                document.getElementById('fichaNomeUnidade').textContent = '--';
+                atualizarFichaImpressao();
             }
 
             // ============================================================
-            // SOLICITAÇÕES - APENAS ALTERAÇÃO E EXCLUSÃO
+            // ATUALIZAR FICHA DE IMPRESSÃO
+            // ============================================================
+            function atualizarFichaImpressao() {
+                const tbody = document.getElementById('tbodyFicha');
+                const lista = profissionaisFiltrados;
+
+                if (!lista || lista.length === 0) {
+                    tbody.innerHTML =
+                        '<tr><td colspan="12" style="text-align:center;">Nenhum profissional encontrado.</td></tr>';
+                    return;
+                }
+
+                let html = '';
+                lista.forEach((p, index) => {
+                    html += `
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td>Inclusão</td>
+                            <td>${p.nome_profissional || ''}</td>
+                            <td>${p.cpf || ''}</td>
+                            <td>${p.cbo || ''}</td>
+                            <td>${p.conselho || ''}</td>
+                            <td>${p.registro || ''}</td>
+                            <td>${p.uf_conselho || ''}</td>
+                            <td>${p.cargo_funcao || ''}</td>
+                            <td>${p.tipo_vinculo || ''}</td>
+                            <td>${p.carga_horaria || ''}</td>
+                            <td>${p.setor_equipe || ''}</td>
+                        </tr>
+                    `;
+                });
+                tbody.innerHTML = html;
+            }
+
+            // ============================================================
+            // SOLICITAÇÕES
             // ============================================================
             async function carregarSolicitacoes() {
                 try {
@@ -1154,7 +2473,7 @@
             }
 
             // ============================================================
-            // APROVAR / REJEITAR COM MODAL PARA ALTERAÇÃO
+            // APROVAR / REJEITAR
             // ============================================================
             async function aprovarSolicitacao(id) {
                 try {
@@ -1164,56 +2483,70 @@
                         .eq('id', id)
                         .single();
                     if (e1) throw e1;
-
                     if (sol.tipo === 'delete') {
                         if (!confirm('Deseja realmente excluir este profissional?')) return;
                         await executarDelete(sol);
                         return;
                     }
-
                     if (sol.tipo === 'update') {
-                        // Abrir modal para revisão da alteração
                         mostrarModalAprovacaoAlteracao(sol);
                         return;
                     }
-
-                    // fallback (insert não é permitido aqui, mas caso venha)
-                    alert('Tipo de ação não suportado para aprovação direta.');
+                    alert('Tipo de ação não suportado.');
                 } catch (e) {
-                    console.error('Erro ao aprovar:', e);
+                    console.error(e);
                     alert('❌ Erro ao aprovar: ' + e.message);
                 }
             }
 
+            // ============================================================
+            // MODAL DE ALTERAÇÃO (COM LISTAS COMPLETAS)
+            // ============================================================
             function mostrarModalAprovacaoAlteracao(sol) {
                 solicitacaoEmAprovacao = sol;
-
                 const container = document.getElementById('modalAprovacaoConteudo');
                 const antigos = sol.dados_antigos || {};
                 const novos = sol.dados_novos || {};
 
-                // Lista de campos a exibir
-                const campos = [
+                // Campos com select (CNES, Vínculo, CBO)
+                const camposSelect = {
+                    'cnes': {
+                        label: 'CNES',
+                        options: todasUnidades.map(u => ({ value: u.cnes, text: u.cnes + ' - ' + u.nome_unidade })),
+                        value: novos.cnes || antigos.cnes || ''
+                    },
+                    'tipo_vinculo': {
+                        label: 'Vínculo',
+                        options: opcoesVinculo.map(v => ({ value: v, text: v })),
+                        value: novos.tipo_vinculo || antigos.tipo_vinculo || ''
+                    },
+                    'cbo': {
+                        label: 'CBO',
+                        options: listaCBO.map(c => ({ value: c.codigo, text: c.codigo + ' - ' + c.descricao })),
+                        value: novos.cbo || antigos.cbo || ''
+                    }
+                };
+
+                const camposInput = [
                     { key: 'nome_profissional', label: 'Nome' },
                     { key: 'cpf', label: 'CPF' },
-                    { key: 'cbo', label: 'CBO' },
                     { key: 'conselho', label: 'Conselho' },
                     { key: 'registro', label: 'Registro' },
                     { key: 'uf_conselho', label: 'UF' },
                     { key: 'cargo_funcao', label: 'Cargo' },
-                    { key: 'tipo_vinculo', label: 'Vínculo' },
                     { key: 'carga_horaria', label: 'C.H.' },
-                    { key: 'setor_equipe', label: 'Setor' },
-                    { key: 'cnes', label: 'CNES' }
+                    { key: 'setor_equipe', label: 'Setor' }
                 ];
 
                 let html = `
-                    <p style="margin-bottom:15px;color:#6c757d;">Revise os dados antes de confirmar a alteração. Os campos em <span style="background:#fff3cd;padding:0 4px;border-radius:3px;">destaque</span> serão alterados.</p>
+                    <p style="margin-bottom:15px;color:#6c757d;">Revise os dados antes de confirmar a alteração. Campos com <span style="background:#fff3cd;padding:0 4px;border-radius:3px;">destaque</span> serão alterados.</p>
                     <div class="dados-compare">
                         <div class="coluna-antiga">
                             <h5>Dados Atuais</h5>
                 `;
-                campos.forEach(campo => {
+                const todosCampos = [...camposInput, ...Object.keys(camposSelect).map(k => ({ key: k, label: camposSelect[k]
+                        .label }))];
+                todosCampos.forEach(campo => {
                     const valor = antigos[campo.key] || '';
                     html += `
                         <div class="campo-linha">
@@ -1222,12 +2555,13 @@
                         </div>
                     `;
                 });
+
                 html += `
                         </div>
                         <div class="coluna-nova">
                             <h5>Novos Dados (editáveis)</h5>
                 `;
-                campos.forEach(campo => {
+                camposInput.forEach(campo => {
                     const valorAntigo = antigos[campo.key] || '';
                     const valorNovo = novos[campo.key] || '';
                     const alterado = valorAntigo !== valorNovo;
@@ -1238,6 +2572,28 @@
                         </div>
                     `;
                 });
+
+                Object.keys(camposSelect).forEach(key => {
+                    const campo = camposSelect[key];
+                    const valorAntigo = antigos[key] || '';
+                    const valorNovo = campo.value;
+                    const alterado = valorAntigo !== valorNovo;
+                    html += `
+                        <div class="campo-linha">
+                            <span class="rotulo">${campo.label}:</span>
+                            <select class="valor" data-campo="${key}" style="${alterado ? 'background:#fff3cd;' : ''}">
+                                <option value="">Selecione...</option>
+                    `;
+                    campo.options.forEach(opt => {
+                        const selected = opt.value === valorNovo ? 'selected' : '';
+                        html += `<option value="${opt.value}" ${selected}>${opt.text}</option>`;
+                    });
+                    html += `
+                            </select>
+                        </div>
+                    `;
+                });
+
                 html += `
                         </div>
                     </div>
@@ -1250,18 +2606,19 @@
 
             async function confirmarAlteracao() {
                 if (!solicitacaoEmAprovacao) return;
-
-                // Coletar os valores editados do modal
                 const inputs = document.querySelectorAll('#modalAprovacaoConteudo input.valor');
+                const selects = document.querySelectorAll('#modalAprovacaoConteudo select.valor');
                 const novosDados = {};
                 inputs.forEach(inp => {
                     const campo = inp.dataset.campo;
                     novosDados[campo] = inp.value;
                 });
+                selects.forEach(sel => {
+                    const campo = sel.dataset.campo;
+                    novosDados[campo] = sel.value;
+                });
 
-                // Confirmar
                 if (!confirm('Confirmar a alteração com os dados revisados?')) return;
-
                 try {
                     const sol = solicitacaoEmAprovacao;
                     const { error } = await supabaseClient
@@ -1270,50 +2627,37 @@
                         .eq('id', sol.profissional_id);
                     if (error) throw error;
 
-                    // Atualizar solicitação
-                    const { error: updateError } = await supabaseClient
+                    await supabaseClient
                         .from('solicitacoes')
                         .update({ status: 'aprovado', aprovado_em: new Date().toISOString() })
                         .eq('id', sol.id);
-                    if (updateError) throw updateError;
 
-                    // Remover da lista local
                     solicitacoesPendentes = solicitacoesPendentes.filter(s => s.id !== sol.id);
                     renderizarSolicitacoes();
-
-                    // Fechar modal
                     fecharModal('modalAprovacaoAlteracao');
                     solicitacaoEmAprovacao = null;
 
-                    // Recarregar dados
                     await recarregarDadosRealtime();
                     alert('✅ Alteração aprovada e executada com sucesso.');
                 } catch (e) {
-                    console.error('Erro ao confirmar alteração:', e);
+                    console.error(e);
                     alert('❌ Erro ao confirmar alteração: ' + e.message);
                 }
             }
 
             async function executarDelete(sol) {
                 try {
-                    const { error } = await supabaseClient
-                        .from('profissionais')
-                        .delete()
-                        .eq('id', sol.profissional_id);
-                    if (error) throw error;
-
-                    const { error: updateError } = await supabaseClient
+                    await supabaseClient.from('profissionais').delete().eq('id', sol.profissional_id);
+                    await supabaseClient
                         .from('solicitacoes')
                         .update({ status: 'aprovado', aprovado_em: new Date().toISOString() })
                         .eq('id', sol.id);
-                    if (updateError) throw updateError;
-
                     solicitacoesPendentes = solicitacoesPendentes.filter(s => s.id !== sol.id);
                     renderizarSolicitacoes();
                     await recarregarDadosRealtime();
                     alert('✅ Exclusão aprovada e executada.');
                 } catch (e) {
-                    console.error('Erro ao excluir:', e);
+                    console.error(e);
                     alert('❌ Erro ao excluir: ' + e.message);
                 }
             }
@@ -1321,38 +2665,32 @@
             async function rejeitarSolicitacao(id) {
                 if (!confirm('Rejeitar esta solicitação?')) return;
                 try {
-                    const { error: updateError } = await supabaseClient
+                    await supabaseClient
                         .from('solicitacoes')
                         .update({ status: 'rejeitado' })
                         .eq('id', id);
-                    if (updateError) throw updateError;
-
                     solicitacoesPendentes = solicitacoesPendentes.filter(s => s.id !== id);
                     renderizarSolicitacoes();
-
                     alert('Solicitação rejeitada.');
                     await recarregarDadosRealtime();
                 } catch (e) {
-                    console.error('Erro ao rejeitar:', e);
+                    console.error(e);
                     alert('Erro ao rejeitar: ' + e.message);
-                    await recarregarDadosRealtime();
                 }
             }
 
             // ============================================================
-            // FILTRO DE OPÇÕES DO SELECT + SELEÇÃO AUTOMÁTICA
+            // FILTROS
             // ============================================================
             function filtrarOpcoesUnidade() {
                 const input = document.getElementById('buscaUnidade');
                 const termo = input.value.toLowerCase().trim();
                 const select = document.getElementById('selecionarUnidade');
-
                 select.innerHTML = '';
                 const optTodos = document.createElement('option');
                 optTodos.value = '__todos__';
                 optTodos.textContent = 'Todas as unidades';
                 select.appendChild(optTodos);
-
                 let opcoesFiltradas = [];
                 if (termo === '') {
                     todasOpcoesSelect.forEach(opt => {
@@ -1366,7 +2704,6 @@
                     aplicarFiltroUnidade();
                     return;
                 }
-
                 todasOpcoesSelect.forEach(opt => {
                     if (opt.value === '__todos__') return;
                     const texto = opt.textContent.toLowerCase();
@@ -1377,7 +2714,6 @@
                         opcoesFiltradas.push(clone);
                     }
                 });
-
                 if (opcoesFiltradas.length === 0) {
                     const msg = document.createElement('option');
                     msg.value = '';
@@ -1388,7 +2724,6 @@
                     aplicarFiltroUnidade();
                     return;
                 }
-
                 if (opcoesFiltradas.length === 1) {
                     select.value = opcoesFiltradas[0].value;
                     aplicarFiltroUnidade();
@@ -1398,49 +2733,186 @@
                 }
             }
 
+            function aplicarFiltroEspecialidade(lista) {
+                const filtro = document.getElementById('filtroEspecialidade').value;
+                if (filtro === 'todos') return lista;
+                if (filtro === 'medico') return lista.filter(p => p.cbo && p.cbo.startsWith('2231'));
+                if (filtro === 'enfermeiro') return lista.filter(p => p.cbo === '2235-05');
+                if (filtro === 'dentista') return lista.filter(p => p.cbo && p.cbo.startsWith('2232'));
+                return lista;
+            }
+
+            async function aplicarFiltroUnidade() {
+                const cnes = document.getElementById('selecionarUnidade').value;
+                if (cnes === '__todos__') {
+                    unidadeSelecionada = null;
+                    profissionaisFiltrados = [...todosProfissionais];
+                    limparDadosUnidade();
+                    document.getElementById('fichaCnes').textContent = '--';
+                    document.getElementById('fichaNomeUnidade').textContent = '--';
+                } else {
+                    unidadeSelecionada = cnes;
+                    try {
+                        const { data: unidade, error: e1 } = await supabaseClient
+                            .from('unidades_saude')
+                            .select('*')
+                            .eq('cnes', cnes)
+                            .maybeSingle();
+                        if (e1) throw e1;
+                        if (unidade) {
+                            document.getElementById('cnes').value = unidade.cnes || '';
+                            document.getElementById('nomeUnidade').value = unidade.nome_unidade || '';
+                            document.getElementById('uf').value = unidade.uf || '';
+                            document.getElementById('tipoUnidade').value = unidade.tipo_unidade || '';
+                            document.getElementById('municipio').value = unidade.municipio || '';
+                            document.getElementById('endereco').value = unidade.endereco || '';
+                            document.getElementById('telefone').value = unidade.telefone || '';
+                            document.getElementById('responsavel').value = unidade.responsavel || '';
+                            document.getElementById('cargoResponsavel').value = unidade.cargo_responsavel || '';
+                            document.getElementById('dataEmissao').value = unidade.data_emissao || '';
+                            document.getElementById('dataPreenchimento').value = unidade.data_preenchimento || '';
+                            document.getElementById('fichaCnes').textContent = unidade.cnes || '--';
+                            document.getElementById('fichaNomeUnidade').textContent = unidade.nome_unidade || '--';
+                        }
+                    } catch (e) {
+                        console.error(e);
+                        limparDadosUnidade();
+                        document.getElementById('fichaCnes').textContent = '--';
+                        document.getElementById('fichaNomeUnidade').textContent = '--';
+                    }
+                    profissionaisFiltrados = todosProfissionais.filter(p => p.cnes === cnes);
+                }
+                profissionaisFiltrados = aplicarFiltroEspecialidade(profissionaisFiltrados);
+                const buscaGlobal = document.getElementById('buscaProfissionais').value.trim();
+                if (buscaGlobal !== '') {
+                    profissionaisFiltrados = profissionaisFiltrados.filter(p =>
+                        (p.nome_profissional && p.nome_profissional.toLowerCase().includes(buscaGlobal.toLowerCase())) ||
+                        (p.cpf && p.cpf.includes(buscaGlobal)) ||
+                        (p.cbo && listaCBO.some(cbo =>
+                            cbo.codigo === p.cbo && cbo.descricao.toLowerCase().includes(buscaGlobal.toLowerCase())
+                        ))
+                    );
+                }
+                renderizarTabelaProfissionais(profissionaisFiltrados);
+                document.getElementById('totalEncontrados').textContent = profissionaisFiltrados.length + ' encontrados';
+                atualizarFichaImpressao();
+            }
+
+            async function aplicarBuscaGlobal() {
+                const input = document.getElementById('buscaProfissionais');
+                const termo = input.value.trim();
+                let lista = [];
+                if (termo === '') {
+                    lista = [...profissionaisFiltrados];
+                } else {
+                    try {
+                        const { data: resultados, error } = await supabaseClient
+                            .from('profissionais')
+                            .select('*')
+                            .or(`nome_profissional.ilike.%${termo}%,cpf.ilike.%${termo}%`)
+                            .order('nome_profissional');
+                        if (error) throw error;
+                        lista = resultados || [];
+                        const cboEncontrados = listaCBO.filter(cbo =>
+                            cbo.descricao.toLowerCase().includes(termo.toLowerCase())
+                        );
+                        if (cboEncontrados.length > 0) {
+                            const codigos = cboEncontrados.map(c => c.codigo);
+                            const profissionaisPorCBO = todosProfissionais.filter(p =>
+                                codigos.includes(p.cbo)
+                            );
+                            const ids = new Set(lista.map(p => p.id));
+                            profissionaisPorCBO.forEach(p => {
+                                if (!ids.has(p.id)) {
+                                    lista.push(p);
+                                    ids.add(p.id);
+                                }
+                            });
+                        }
+                    } catch (e) {
+                        console.error(e);
+                        document.getElementById('tbodyProfissionais').innerHTML =
+                            '<tr><td colspan="12" class="sem-dados"><i class="fas fa-exclamation-triangle"></i>Erro ao buscar: ' +
+                            e.message + '</td></tr>';
+                        document.getElementById('totalEncontrados').textContent = '0 encontrados';
+                        return;
+                    }
+                }
+                lista = aplicarFiltroEspecialidade(lista);
+                renderizarTabelaProfissionais(lista);
+                document.getElementById('totalEncontrados').textContent = lista.length + ' encontrados';
+                const tbody = document.getElementById('tbodyFicha');
+                if (!lista || lista.length === 0) {
+                    tbody.innerHTML =
+                        '<tr><td colspan="12" style="text-align:center;">Nenhum profissional encontrado.</td></tr>';
+                } else {
+                    let html = '';
+                    lista.forEach((p, index) => {
+                        html += `
+                            <tr>
+                                <td>${index + 1}</td>
+                                <td>Inclusão</td>
+                                <td>${p.nome_profissional || ''}</td>
+                                <td>${p.cpf || ''}</td>
+                                <td>${p.cbo || ''}</td>
+                                <td>${p.conselho || ''}</td>
+                                <td>${p.registro || ''}</td>
+                                <td>${p.uf_conselho || ''}</td>
+                                <td>${p.cargo_funcao || ''}</td>
+                                <td>${p.tipo_vinculo || ''}</td>
+                                <td>${p.carga_horaria || ''}</td>
+                                <td>${p.setor_equipe || ''}</td>
+                            </tr>
+                        `;
+                    });
+                    tbody.innerHTML = html;
+                }
+            }
+
+            function limparDadosUnidade() {
+                ['cnes', 'nomeUnidade', 'uf', 'tipoUnidade', 'municipio', 'endereco', 'telefone', 'responsavel',
+                    'cargoResponsavel', 'dataEmissao', 'dataPreenchimento'
+                ].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.value = '';
+                });
+                document.getElementById('fichaCnes').textContent = '--';
+                document.getElementById('fichaNomeUnidade').textContent = '--';
+            }
+
             // ============================================================
-            // DASHBOARD (ATUALIZAR CARDS, GRÁFICOS, RANKINGS, ALERTAS)
+            // DASHBOARD
             // ============================================================
             async function atualizarDashboard() {
                 const profs = todosProfissionais;
                 const unids = todasUnidades;
-
                 document.getElementById('kpiTotalProf').textContent = profs.length;
                 document.getElementById('kpiTotalUnid').textContent = unids.length;
-
-                const medicos = profs.filter(p => p.cbo && p.cbo.startsWith('225'));
-                document.getElementById('kpiMedicos').textContent = medicos.length;
-                const enfermeiros = profs.filter(p => p.cbo === '2235-05');
-                document.getElementById('kpiEnfermeiros').textContent = enfermeiros.length;
-                const acs = profs.filter(p => p.cbo === '5151-05');
-                document.getElementById('kpiACS').textContent = acs.length;
-                const dentistas = profs.filter(p => p.cbo && p.cbo.startsWith('2232'));
-                document.getElementById('kpiDentistas').textContent = dentistas.length;
-                const cbos = new Set(profs.map(p => p.cbo).filter(Boolean));
-                document.getElementById('kpiCBOs').textContent = cbos.size;
-
+                document.getElementById('kpiMedicos').textContent = profs.filter(p => p.cbo && p.cbo.startsWith('2231'))
+                    .length;
+                document.getElementById('kpiEnfermeiros').textContent = profs.filter(p => p.cbo === '2235-05').length;
+                document.getElementById('kpiACS').textContent = profs.filter(p => p.cbo === '5151-05').length;
+                document.getElementById('kpiDentistas').textContent = profs.filter(p => p.cbo && p.cbo.startsWith('2232'))
+                    .length;
+                document.getElementById('kpiCBOs').textContent = new Set(profs.map(p => p.cbo).filter(Boolean)).size;
                 const hoje = new Date().toISOString().split('T')[0];
-                const atualizadosHoje = profs.filter(p => p.updated_at && p.updated_at.startsWith(hoje));
-                document.getElementById('kpiHoje').textContent = atualizadosHoje.length;
-
+                document.getElementById('kpiHoje').textContent = profs.filter(p => p.updated_at && p.updated_at.startsWith(
+                    hoje)).length;
                 const obrigatorios = ['nome_profissional', 'cpf', 'cbo', 'conselho', 'registro', 'cnes'];
                 let completos = 0;
                 profs.forEach(p => {
-                    const ok = obrigatorios.every(campo => p[campo] && p[campo].trim() !== '');
-                    if (ok) completos++;
+                    if (obrigatorios.every(campo => p[campo] && p[campo].trim() !== '')) completos++;
                 });
-                const perc = profs.length ? Math.round((completos / profs.length) * 100) : 0;
-                document.getElementById('kpiCompletude').textContent = perc + '%';
-
+                document.getElementById('kpiCompletude').textContent = profs.length ? Math.round((completos / profs.length) *
+                    100) + '%' : '0%';
                 await atualizarMovimentacoesHoje();
-
                 gerarGraficos(profs);
                 gerarRankings(profs);
                 gerarAlertas(profs);
             }
 
             // ============================================================
-            // MOVIMENTAÇÕES DE HOJE (aprovadas)
+            // MOVIMENTAÇÕES DE HOJE
             // ============================================================
             async function atualizarMovimentacoesHoje() {
                 const hoje = new Date().toISOString().split('T')[0];
@@ -1460,9 +2932,9 @@
                     document.getElementById('kpiExclusoesHoje').textContent = exclusoes;
                 } catch (e) {
                     console.error('Erro ao buscar movimentações de hoje:', e);
-                    document.getElementById('kpiInclusoesHoje').textContent = '?';
-                    document.getElementById('kpiAlteracoesHoje').textContent = '?';
-                    document.getElementById('kpiExclusoesHoje').textContent = '?';
+                    document.getElementById('kpiInclusoesHoje').textContent = '0';
+                    document.getElementById('kpiAlteracoesHoje').textContent = '0';
+                    document.getElementById('kpiExclusoesHoje').textContent = '0';
                 }
             }
 
@@ -1485,24 +2957,16 @@
                     return nomes[parseInt(mes) - 1] + '/' + ano.slice(2);
                 });
                 const data = sorted.map(m => meses[m]);
-
                 const ctx1 = document.getElementById('chartMensal').getContext('2d');
                 if (chartMensal) chartMensal.destroy();
                 chartMensal = new Chart(ctx1, {
                     type: 'bar',
-                    data: {
-                        labels: labels,
-                        datasets: [{ label: 'Atualizações', data: data, backgroundColor: '#003c7d' }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: { legend: { display: false } },
-                        scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
-                    }
+                    data: { labels, datasets: [{ label: 'Atualizações', data, backgroundColor: '#003c7d' }] },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
+                        scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
                 });
 
-                // Semanal (últimos 7 dias)
+                // Semanal
                 const dias = {};
                 const hoje = new Date();
                 for (let i = 6; i >= 0; i--) {
@@ -1517,12 +2981,9 @@
                         if (dias.hasOwnProperty(data)) dias[data]++;
                     }
                 });
-                const labelsDias = Object.keys(dias).map(d => {
-                    const dt = new Date(d);
-                    return dt.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit' });
-                });
+                const labelsDias = Object.keys(dias).map(d => new Date(d).toLocaleDateString('pt-BR', { weekday: 'short',
+                    day: '2-digit' }));
                 const dataDias = Object.values(dias);
-
                 const ctx2 = document.getElementById('chartSemanal').getContext('2d');
                 if (chartSemanal) chartSemanal.destroy();
                 chartSemanal = new Chart(ctx2, {
@@ -1532,20 +2993,14 @@
                         datasets: [{ label: 'Movimentações', data: dataDias, borderColor: '#fd7e14',
                                 backgroundColor: 'rgba(253,126,20,0.1)', fill: true, tension: 0.3 }]
                     },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: { legend: { display: false } },
-                        scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
-                    }
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
+                        scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
                 });
 
                 // CBO Top 10
                 const cboCount = {};
                 profs.forEach(p => {
-                    if (p.cbo) {
-                        cboCount[p.cbo] = (cboCount[p.cbo] || 0) + 1;
-                    }
+                    if (p.cbo) cboCount[p.cbo] = (cboCount[p.cbo] || 0) + 1;
                 });
                 const sortedCBO = Object.entries(cboCount).sort((a, b) => b[1] - a[1]).slice(0, 10);
                 const cboLabels = sortedCBO.map(([cbo]) => cbo);
@@ -1553,7 +3008,6 @@
                 const cores = ['#003c7d', '#28a745', '#ffc107', '#dc3545', '#17a2b8', '#6f42c1', '#fd7e14', '#20c997',
                     '#e83e8c', '#007bff'
                 ];
-
                 const ctx3 = document.getElementById('chartCBO').getContext('2d');
                 if (chartCBO) chartCBO.destroy();
                 chartCBO = new Chart(ctx3, {
@@ -1562,14 +3016,11 @@
                         labels: cboLabels.length ? cboLabels : ['Nenhum CBO'],
                         datasets: [{ data: cboLabels.length ? cboData : [1], backgroundColor: cores }]
                     },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } } }
-                    }
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom',
+                                labels: { boxWidth: 12, font: { size: 10 } } } } }
                 });
 
-                // Radar: faixas de carga horária
+                // Radar
                 const faixas = { '0-20h': 0, '21-40h': 0, '41-60h': 0, '60h+': 0 };
                 profs.forEach(p => {
                     const ch = parseInt(p.carga_horaria);
@@ -1595,12 +3046,8 @@
                             fill: true
                         }]
                     },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: { legend: { display: false } },
-                        scales: { r: { beginAtZero: true, ticks: { stepSize: 1 } } }
-                    }
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
+                        scales: { r: { beginAtZero: true, ticks: { stepSize: 1 } } } }
                 });
             }
 
@@ -1608,29 +3055,6 @@
             // RANKINGS
             // ============================================================
             function gerarRankings(profs) {
-                // Unidades com mais profissionais
-                const unidCount = {};
-                profs.forEach(p => {
-                    if (p.cnes) {
-                        unidCount[p.cnes] = (unidCount[p.cnes] || 0) + 1;
-                    }
-                });
-                const sortedUnid = Object.entries(unidCount).sort((a, b) => b[1] - a[1]).slice(0, 10);
-                const listUnid = document.getElementById('rankingUnidades');
-                listUnid.innerHTML = '';
-                if (sortedUnid.length === 0) {
-                    listUnid.innerHTML = '<li style="color:#6c757d;">Nenhum dado</li>';
-                } else {
-                    sortedUnid.forEach(([cnes, count]) => {
-                        const un = todasUnidades.find(u => u.cnes === cnes);
-                        const nome = un ? un.nome_unidade : cnes;
-                        const li = document.createElement('li');
-                        li.innerHTML = `<span>${nome}</span><span class="badge">${count}</span>`;
-                        listUnid.appendChild(li);
-                    });
-                }
-
-                // Profissionais com múltiplas lotações
                 const cpfMap = {};
                 profs.forEach(p => {
                     if (p.cpf && p.cnes) {
@@ -1644,7 +3068,6 @@
                             .unidades) }))
                     .sort((a, b) => b.total - a.total)
                     .slice(0, 10);
-
                 const listMulti = document.getElementById('rankingMultiplas');
                 listMulti.innerHTML = '';
                 if (multiplas.length === 0) {
@@ -1665,53 +3088,74 @@
             }
 
             // ============================================================
-            // ALERTAS (com CPF duplicado mostrando nomes)
+            // ALERTAS (CPF DUPLICADO RESTAURADO)
             // ============================================================
             function gerarAlertas(profs) {
                 const alertList = document.getElementById('alertList');
                 const alerts = [];
 
-                // CPF duplicado - incluir nomes
-                const cpfMap = {};
+                // CPF duplicado na mesma unidade
+                const cpfUnidadeMap = {};
                 profs.forEach(p => {
-                    if (p.cpf) {
-                        if (!cpfMap[p.cpf]) cpfMap[p.cpf] = [];
-                        cpfMap[p.cpf].push(p.nome_profissional || 'N/I');
+                    if (p.cpf && p.cnes) {
+                        const key = p.cpf + '|' + p.cnes;
+                        if (!cpfUnidadeMap[key]) {
+                            cpfUnidadeMap[key] = { cpf: p.cpf, cnes: p.cnes, profissionais: [] };
+                        }
+                        cpfUnidadeMap[key].profissionais.push(p);
                     }
                 });
-                const duplicados = Object.entries(cpfMap).filter(([, nomes]) => nomes.length > 1);
+
+                const duplicados = Object.values(cpfUnidadeMap).filter(item => item.profissionais.length > 1);
                 if (duplicados.length) {
-                    const detalhes = duplicados.map(([cpf, nomes]) => ({
-                        cpf: cpf,
-                        nomes: nomes.join(', '),
-                        qtd: nomes.length
-                    }));
+                    const profissionaisDuplicados = [];
+                    duplicados.forEach(item => {
+                        const unidade = todasUnidades.find(u => u.cnes === item.cnes);
+                        const nomeUnidade = unidade ? unidade.nome_unidade : item.cnes;
+                        item.profissionais.forEach(p => {
+                            profissionaisDuplicados.push({
+                                id: p.id,
+                                nome: p.nome_profissional || 'N/I',
+                                cpf: p.cpf,
+                                unidade: nomeUnidade
+                            });
+                        });
+                    });
                     alerts.push({
                         level: 'critical',
                         icon: 'fa-user-slash',
-                        msg: `${duplicados.length} CPF(s) duplicado(s).`,
-                        detalhes: detalhes,
-                        colunas: ['Nomes', 'CPF', 'Quantidade'],
-                        titulo: 'CPFs Duplicados'
+                        msg: `${profissionaisDuplicados.length} profissionais com CPF duplicado na mesma unidade.`,
+                        detalhes: profissionaisDuplicados,
+                        colunas: [
+                            { key: 'nome', label: 'Nome' },
+                            { key: 'cpf', label: 'CPF' },
+                            { key: 'unidade', label: 'Unidade' }
+                        ],
+                        titulo: 'CPFs Duplicados por Unidade',
+                        acoes: true
                     });
                 }
 
-                // Registros órfãos
+                // Outros alertas
                 const orfaos = profs.filter(p => p.cnes && !todasUnidades.some(u => u.cnes === p.cnes));
                 if (orfaos.length) {
-                    const lista = orfaos.map(p => ({ id: p.id, nome: p.nome_profissional || 'N/I', cpf: p.cpf || '',
-                        cnes: p.cnes }));
                     alerts.push({
                         level: 'critical',
                         icon: 'fa-building',
                         msg: `${orfaos.length} profissional(is) com CNES sem unidade.`,
-                        detalhes: lista,
-                        colunas: ['id', 'nome', 'cpf', 'cnes'],
-                        titulo: 'Profissionais com CNES sem unidade'
+                        detalhes: orfaos.map(p => ({ id: p.id, nome: p.nome_profissional || 'N/I', cpf: p.cpf || '',
+                            cnes: p.cnes })),
+                        colunas: [
+                            { key: 'id', label: 'ID' },
+                            { key: 'nome', label: 'Nome' },
+                            { key: 'cpf', label: 'CPF' },
+                            { key: 'cnes', label: 'CNES' }
+                        ],
+                        titulo: 'Profissionais com CNES sem unidade',
+                        acoes: false
                     });
                 }
 
-                // CBO inválido
                 const invalidos = profs.filter(p => p.cbo && !/^\d/.test(p.cbo));
                 if (invalidos.length) {
                     alerts.push({
@@ -1719,19 +3163,23 @@
                         icon: 'fa-id-card',
                         msg: `${invalidos.length} profissional(is) com CBO inválido.`,
                         detalhes: invalidos.map(p => ({ id: p.id, nome: p.nome_profissional || 'N/I', cbo: p.cbo })),
-                        colunas: ['id', 'nome', 'cbo'],
-                        titulo: 'CBOs inválidos'
+                        colunas: [
+                            { key: 'id', label: 'ID' },
+                            { key: 'nome', label: 'Nome' },
+                            { key: 'cbo', label: 'CBO' }
+                        ],
+                        titulo: 'CBOs inválidos',
+                        acoes: false
                     });
                 }
 
-                // Unidades sem profissionais
                 const unidComProf = new Set(profs.map(p => p.cnes).filter(Boolean));
                 const unidVazias = todasUnidades.filter(u => !unidComProf.has(u.cnes));
                 if (unidVazias.length) {
-                    alerts.push({ level: 'low', icon: 'fa-hospital', msg: `${unidVazias.length} unidade(s) sem profissionais.` });
+                    alerts.push({ level: 'low', icon: 'fa-hospital', msg: `${unidVazias.length} unidade(s) sem profissionais.`,
+                        acoes: false });
                 }
 
-                // Atualizações antigas (>90 dias)
                 const hoje = new Date();
                 const antigos = profs.filter(p => {
                     if (!p.updated_at) return false;
@@ -1739,7 +3187,8 @@
                     return diff > 90;
                 });
                 if (antigos.length) {
-                    alerts.push({ level: 'low', icon: 'fa-clock', msg: `${antigos.length} profissional(is) sem atualização há >90 dias.` });
+                    alerts.push({ level: 'low', icon: 'fa-clock', msg: `${antigos.length} profissional(is) sem atualização há >90 dias.`,
+                        acoes: false });
                 }
 
                 document.getElementById('kpiAlertas').textContent = alerts.length;
@@ -1761,9 +3210,9 @@
                             const btn = document.createElement('button');
                             btn.textContent = 'Ver detalhes';
                             btn.onclick = () => {
-                                abrirModalAlertas(a.titulo || 'Detalhes', a.detalhes, a.colunas || ['id',
-                                    'nome'
-                                ]);
+                                abrirModalAlertas(a.titulo || 'Detalhes', a.detalhes, a.colunas || [
+                                    { key: 'id', label: 'ID' }, { key: 'nome', label: 'Nome' }
+                                ], a.acoes || false);
                             };
                             actions.appendChild(btn);
                             div.appendChild(actions);
@@ -1774,22 +3223,27 @@
             }
 
             // ============================================================
-            // MODAL PARA DETALHES DOS ALERTAS
+            // MODAL PARA ALERTAS
             // ============================================================
-            function abrirModalAlertas(titulo, dados, colunas) {
+            function abrirModalAlertas(titulo, dados, colunas, temAcao) {
                 document.getElementById('modalAlertasTitulo').textContent = titulo;
                 const conteudo = document.getElementById('modalAlertasConteudo');
                 if (!dados || dados.length === 0) {
                     conteudo.innerHTML = '<p>Nenhum dado encontrado.</p>';
                 } else {
                     let html = '<table><thead><tr>';
-                    colunas.forEach(col => html += `<th>${col}</th>`);
+                    colunas.forEach(col => html += `<th>${col.label}</th>`);
+                    if (temAcao) html += `<th>Ação</th>`;
                     html += '</tr></thead><tbody>';
                     dados.forEach(item => {
                         html += '<tr>';
                         colunas.forEach(col => {
-                            html += `<td>${item[col] || ''}</td>`;
+                            html += `<td>${item[col.key] || ''}</td>`;
                         });
+                        if (temAcao && item.id) {
+                            html +=
+                                `<td><button class="btn-excluir-duplicado" onclick="excluirProfissional('${item.id}')">Excluir</button></td>`;
+                        }
                         html += '</tr>';
                     });
                     html += '</tbody></table>';
@@ -1798,6 +3252,235 @@
                 document.getElementById('modalAlertas').classList.add('active');
             }
 
+            // ============================================================
+            // EXCLUIR PROFISSIONAL
+            // ============================================================
+            window.excluirProfissional = async function(id) {
+                if (!confirm('Deseja realmente excluir este profissional? Esta ação é irreversível.')) return;
+                try {
+                    const { error } = await supabaseClient
+                        .from('profissionais')
+                        .delete()
+                        .eq('id', id);
+                    if (error) throw error;
+                    alert('✅ Profissional excluído com sucesso.');
+                    await recarregarDadosRealtime();
+                    fecharModal('modalAlertas');
+                } catch (e) {
+                    console.error('Erro ao excluir profissional:', e);
+                    alert('❌ Erro ao excluir: ' + e.message);
+                }
+            };
+
+            // ============================================================
+            // MODAL PARA KPI
+            // ============================================================
+            window.abrirModalKPI = async function(tipo) {
+                const modal = document.getElementById('modalKPI');
+                const titulo = document.getElementById('modalKPITitulo');
+                const conteudo = document.getElementById('modalKPIConteudo');
+
+                let dados = [];
+                let colunas = [];
+                let tituloStr = '';
+
+                switch (tipo) {
+                    case 'totalProfissionais':
+                        tituloStr = 'Total de Profissionais';
+                        dados = todosProfissionais;
+                        colunas = ['nome_profissional', 'cpf', 'cnes'];
+                        break;
+                    case 'totalUnidades':
+                        tituloStr = 'Total de Unidades';
+                        dados = todasUnidades;
+                        colunas = ['nome_unidade', 'cnes', 'municipio'];
+                        break;
+                    case 'medicos':
+                        tituloStr = 'Médicos';
+                        dados = todosProfissionais.filter(p => p.cbo && p.cbo.startsWith('2231'));
+                        colunas = ['nome_profissional', 'cpf', 'cbo', 'cnes'];
+                        break;
+                    case 'enfermeiros':
+                        tituloStr = 'Enfermeiros';
+                        dados = todosProfissionais.filter(p => p.cbo === '2235-05');
+                        colunas = ['nome_profissional', 'cpf', 'cbo', 'cnes'];
+                        break;
+                    case 'acs':
+                        tituloStr = 'ACS';
+                        dados = todosProfissionais.filter(p => p.cbo === '5151-05');
+                        colunas = ['nome_profissional', 'cpf', 'cbo', 'cnes'];
+                        break;
+                    case 'dentistas':
+                        tituloStr = 'Dentistas';
+                        dados = todosProfissionais.filter(p => p.cbo && p.cbo.startsWith('2232'));
+                        colunas = ['nome_profissional', 'cpf', 'cbo', 'cnes'];
+                        break;
+                    case 'cbos':
+                        tituloStr = 'CBOs Distintos';
+                        const cbos = new Set(todosProfissionais.map(p => p.cbo).filter(Boolean));
+                        dados = Array.from(cbos).map(cbo => ({ cbo }));
+                        colunas = ['cbo'];
+                        break;
+                    case 'hoje':
+                        tituloStr = 'Atualizados Hoje';
+                        const hoje = new Date().toISOString().split('T')[0];
+                        dados = todosProfissionais.filter(p => p.updated_at && p.updated_at.startsWith(hoje));
+                        colunas = ['nome_profissional', 'cpf', 'updated_at'];
+                        break;
+                    case 'alertas':
+                        tituloStr = 'Alertas Ativos';
+                        const alertList = document.getElementById('alertList');
+                        const alertItems = alertList.querySelectorAll('.alert-item');
+                        dados = Array.from(alertItems).map(el => {
+                            const texto = el.textContent.trim();
+                            return { alerta: texto };
+                        });
+                        colunas = ['alerta'];
+                        break;
+                    case 'completude':
+                        tituloStr = 'Completude dos Cadastros';
+                        const obrigatorios = ['nome_profissional', 'cpf', 'cbo', 'conselho', 'registro', 'cnes'];
+                        const incompletos = todosProfissionais.filter(p =>
+                            !obrigatorios.every(campo => p[campo] && p[campo].trim() !== '')
+                        );
+                        dados = incompletos.map(p => ({
+                            nome: p.nome_profissional || 'N/I',
+                            cpf: p.cpf || '',
+                            faltam: obrigatorios.filter(campo => !p[campo] || p[campo].trim() === '').join(', ')
+                        }));
+                        colunas = ['nome', 'cpf', 'faltam'];
+                        break;
+                    case 'inclusoesHoje':
+                        tituloStr = 'Inclusões Realizadas Hoje';
+                        dados = await carregarMovimentacoesHojePorTipo('insert');
+                        colunas = ['nome', 'cpf', 'unidade', 'data'];
+                        break;
+                    case 'alteracoesHoje':
+                        tituloStr = 'Alterações Realizadas Hoje';
+                        dados = await carregarMovimentacoesHojePorTipo('update');
+                        colunas = ['nome', 'cpf', 'unidade', 'data'];
+                        break;
+                    case 'exclusoesHoje':
+                        tituloStr = 'Exclusões Realizadas Hoje';
+                        dados = await carregarMovimentacoesHojePorTipo('delete');
+                        colunas = ['nome', 'cpf', 'unidade', 'data'];
+                        break;
+                    default:
+                        tituloStr = 'Detalhes';
+                        dados = [];
+                        colunas = [];
+                }
+
+                if (!dados || dados.length === 0) {
+                    conteudo.innerHTML = '<p>Nenhum dado encontrado para este indicador.</p>';
+                } else {
+                    const mapaLabels = {
+                        'nome_profissional': 'Nome',
+                        'cpf': 'CPF',
+                        'cbo': 'CBO',
+                        'cnes': 'CNES',
+                        'nome_unidade': 'Unidade',
+                        'municipio': 'Município',
+                        'updated_at': 'Atualizado em',
+                        'nome': 'Nome',
+                        'faltam': 'Campos faltantes',
+                        'unidade': 'Unidade',
+                        'data': 'Data/Hora',
+                        'alerta': 'Alerta',
+                        'cbo': 'CBO'
+                    };
+                    const colunasExibidas = colunas.map(col => ({
+                        key: col,
+                        label: mapaLabels[col] || col
+                    }));
+                    let html = '<table><thead><tr>';
+                    colunasExibidas.forEach(col => html += `<th>${col.label}</th>`);
+                    html += '</tr></thead><tbody>';
+                    dados.forEach(item => {
+                        html += '<tr>';
+                        colunasExibidas.forEach(col => {
+                            let valor = item[col.key] || '';
+                            if (col.key === 'updated_at' && valor) {
+                                valor = new Date(valor).toLocaleString();
+                            }
+                            if (col.key === 'data' && valor) {
+                                valor = new Date(valor).toLocaleString();
+                            }
+                            html += `<td>${valor}</td>`;
+                        });
+                        html += '</tr>';
+                    });
+                    html += '</tbody></table>';
+                    conteudo.innerHTML = html;
+                }
+                titulo.textContent = tituloStr;
+                modal.classList.add('active');
+            };
+
+            // ============================================================
+            // CARREGAR MOVIMENTAÇÕES POR TIPO
+            // ============================================================
+            async function carregarMovimentacoesHojePorTipo(tipo) {
+                const hoje = new Date().toISOString().split('T')[0];
+                try {
+                    const { data, error } = await supabaseClient
+                        .from('solicitacoes')
+                        .select('*')
+                        .eq('status', 'aprovado')
+                        .eq('tipo', tipo)
+                        .gte('aprovado_em', hoje)
+                        .lt('aprovado_em', hoje + 'T23:59:59');
+                    if (error) throw error;
+                    const resultados = [];
+                    for (const sol of data) {
+                        let nome = 'N/I',
+                            cpf = 'N/I',
+                            cnes = 'N/I';
+                        if (tipo === 'delete' && sol.dados_antigos) {
+                            nome = sol.dados_antigos.nome_profissional || 'N/I';
+                            cpf = sol.dados_antigos.cpf || 'N/I';
+                            cnes = sol.dados_antigos.cnes || 'N/I';
+                        } else if (tipo === 'update' && sol.dados_novos) {
+                            nome = sol.dados_novos.nome_profissional || 'N/I';
+                            cpf = sol.dados_novos.cpf || 'N/I';
+                            cnes = sol.dados_novos.cnes || 'N/I';
+                        } else if (tipo === 'insert' && sol.dados_novos) {
+                            nome = sol.dados_novos.nome_profissional || 'N/I';
+                            cpf = sol.dados_novos.cpf || 'N/I';
+                            cnes = sol.dados_novos.cnes || 'N/I';
+                        } else {
+                            if (sol.profissional_id) {
+                                const { data: prof, error: e2 } = await supabaseClient
+                                    .from('profissionais')
+                                    .select('nome_profissional, cpf, cnes')
+                                    .eq('id', sol.profissional_id)
+                                    .single();
+                                if (!e2 && prof) {
+                                    nome = prof.nome_profissional || 'N/I';
+                                    cpf = prof.cpf || 'N/I';
+                                    cnes = prof.cnes || 'N/I';
+                                }
+                            }
+                        }
+                        const unidade = todasUnidades.find(u => u.cnes === cnes);
+                        const nomeUnidade = unidade ? unidade.nome_unidade : cnes;
+                        resultados.push({
+                            nome: nome,
+                            cpf: cpf,
+                            unidade: nomeUnidade,
+                            data: sol.aprovado_em
+                        });
+                    }
+                    return resultados;
+                } catch (e) {
+                    console.error('Erro ao carregar movimentações:', e);
+                    return [];
+                }
+            }
+
+            // ============================================================
+            // FECHAR MODAL
+            // ============================================================
             function fecharModal(id) {
                 document.getElementById(id).classList.remove('active');
                 if (id === 'modalAprovacaoAlteracao') {
@@ -1806,99 +3489,7 @@
             }
 
             // ============================================================
-            // FILTRO POR UNIDADE
-            // ============================================================
-            async function aplicarFiltroUnidade() {
-                const cnes = document.getElementById('selecionarUnidade').value;
-                if (cnes === '__todos__') {
-                    unidadeSelecionada = null;
-                    profissionaisFiltrados = [...todosProfissionais];
-                    limparDadosUnidade();
-                } else {
-                    unidadeSelecionada = cnes;
-                    try {
-                        const { data: unidade, error: e1 } = await supabaseClient
-                            .from('unidades_saude')
-                            .select('*')
-                            .eq('cnes', cnes)
-                            .maybeSingle();
-                        if (e1) throw e1;
-                        if (unidade) {
-                            document.getElementById('cnes').value = unidade.cnes || '';
-                            document.getElementById('nomeUnidade').value = unidade.nome_unidade || '';
-                            document.getElementById('uf').value = unidade.uf || '';
-                            document.getElementById('tipoUnidade').value = unidade.tipo_unidade || '';
-                            document.getElementById('municipio').value = unidade.municipio || '';
-                            document.getElementById('endereco').value = unidade.endereco || '';
-                            document.getElementById('telefone').value = unidade.telefone || '';
-                            document.getElementById('responsavel').value = unidade.responsavel || '';
-                            document.getElementById('cargoResponsavel').value = unidade.cargo_responsavel || '';
-                            document.getElementById('dataEmissao').value = unidade.data_emissao || '';
-                            document.getElementById('dataPreenchimento').value = unidade.data_preenchimento || '';
-                        }
-                    } catch (e) {
-                        console.error('Erro ao carregar unidade:', e);
-                        limparDadosUnidade();
-                    }
-                    profissionaisFiltrados = todosProfissionais.filter(p => p.cnes === cnes);
-                }
-                const buscaGlobal = document.getElementById('buscaProfissionais').value.trim();
-                if (buscaGlobal === '') {
-                    renderizarTabelaProfissionais(profissionaisFiltrados);
-                } else {
-                    aplicarBuscaGlobal();
-                }
-                document.getElementById('totalEncontrados').textContent = profissionaisFiltrados.length + ' encontrados';
-            }
-
-            function limparDadosUnidade() {
-                document.getElementById('cnes').value = '';
-                document.getElementById('nomeUnidade').value = '';
-                document.getElementById('uf').value = '';
-                document.getElementById('tipoUnidade').value = '';
-                document.getElementById('municipio').value = '';
-                document.getElementById('endereco').value = '';
-                document.getElementById('telefone').value = '';
-                document.getElementById('responsavel').value = '';
-                document.getElementById('cargoResponsavel').value = '';
-                document.getElementById('dataEmissao').value = '';
-                document.getElementById('dataPreenchimento').value = '';
-            }
-
-            // ============================================================
-            // BUSCA GLOBAL (CONSULTA AO BANCO)
-            // ============================================================
-            async function aplicarBuscaGlobal() {
-                const input = document.getElementById('buscaProfissionais');
-                const termo = input.value.trim();
-
-                if (termo === '') {
-                    renderizarTabelaProfissionais(profissionaisFiltrados);
-                    document.getElementById('totalEncontrados').textContent = profissionaisFiltrados.length + ' encontrados';
-                    return;
-                }
-
-                try {
-                    const { data: resultados, error } = await supabaseClient
-                        .from('profissionais')
-                        .select('*')
-                        .or(`nome_profissional.ilike.%${termo}%,cpf.ilike.%${termo}%`)
-                        .order('nome_profissional');
-                    if (error) throw error;
-                    const lista = resultados || [];
-                    renderizarTabelaProfissionais(lista);
-                    document.getElementById('totalEncontrados').textContent = lista.length + ' encontrados (busca global)';
-                } catch (e) {
-                    console.error('Erro na busca global:', e);
-                    document.getElementById('tbodyProfissionais').innerHTML =
-                        '<tr><td colspan="12" class="sem-dados"><i class="fas fa-exclamation-triangle"></i>Erro ao buscar: ' +
-                        e.message + '</td></tr>';
-                    document.getElementById('totalEncontrados').textContent = '0 encontrados';
-                }
-            }
-
-            // ============================================================
-            // RENDERIZAR TABELA
+            // RENDERIZAR TABELA (tela)
             // ============================================================
             function renderizarTabelaProfissionais(lista) {
                 const tbody = document.getElementById('tbodyProfissionais');
@@ -1909,12 +3500,11 @@
                     return;
                 }
                 lista.forEach((p, i) => {
-                    const unidade = todasUnidades.find(u => u.cnes === p.cnes);
-                    const nomeUnidade = unidade ? unidade.nome_unidade : (p.cnes || 'N/I');
+                    const unidadeCnes = p.cnes || '--';
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
                     <td>${i+1}</td>
-                    <td><input value="${nomeUnidade}" disabled></td>
+                    <td><input value="${unidadeCnes}" disabled></td>
                     <td><input value="${p.nome_profissional || ''}" disabled></td>
                     <td><input value="${p.cpf || ''}" disabled></td>
                     <td><input value="${p.cbo || ''}" disabled></td>
@@ -1938,10 +3528,9 @@
                     'Setor'
                 ];
                 const linhas = profissionaisFiltrados.map(p => {
-                    const un = todasUnidades.find(u => u.cnes === p.cnes);
-                    const nomeUnidade = un ? un.nome_unidade : (p.cnes || '');
+                    const unidadeCnes = p.cnes || '';
                     return [
-                        nomeUnidade,
+                        unidadeCnes,
                         p.nome_profissional || '',
                         p.cpf || '',
                         p.cbo || '',
@@ -1984,6 +3573,8 @@
             window.forcarRecarga = forcarRecarga;
             window.recarregarDadosRealtime = recarregarDadosRealtime;
             window.confirmarAlteracao = confirmarAlteracao;
+            window.abrirModalKPI = abrirModalKPI;
+            window.excluirProfissional = excluirProfissional;
 
         })();
     </script>
