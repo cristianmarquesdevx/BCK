@@ -33,7 +33,7 @@
             min-height: 100vh;
         }
 
-        /* ===== HEADER (tela) ===== */
+        /* ===== HEADER ===== */
         .header {
             border-bottom: 2px solid #003c7d;
         }
@@ -201,6 +201,12 @@
             padding: 12px;
             border: 1px solid #ddd;
             height: 200px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .chart-box:hover {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            transform: scale(1.01);
         }
         .chart-box h5 {
             font-size: 13px;
@@ -283,7 +289,7 @@
             background: #002a5a;
         }
 
-        /* ===== SOLICITAÇÕES PENDENTES (ADMIN) ===== */
+        /* ===== SOLICITAÇÕES PENDENTES ===== */
         .solicitacoes-box {
             background: #fff;
             border-radius: 6px;
@@ -477,12 +483,10 @@
             animation: spin 0.6s linear infinite;
         }
         @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
+            to { transform: rotate(360deg); }
         }
 
-        /* ===== MODAL ===== */
+        /* ===== MODAIS ===== */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -490,7 +494,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(0,0,0,0.5);
             z-index: 1000;
             align-items: center;
             justify-content: center;
@@ -635,8 +639,13 @@
         .modal-box .modal-actions .btn-cancelar:hover {
             background: #c82333;
         }
+        /* Modal do gráfico ampliado */
+        .modal-box.grafico-ampliado canvas {
+            width: 100% !important;
+            height: 70vh !important;
+        }
 
-        /* ===== SEÇÃO DADOS DA UNIDADE (simplificada) ===== */
+        /* ===== SEÇÃO DADOS DA UNIDADE ===== */
         .unidade-destaque {
             background: #f8f9fa;
             padding: 15px 20px;
@@ -670,7 +679,7 @@
             border: 2px solid #003c7d;
         }
 
-        /* ===== RODAPÉ INSTITUCIONAL (tela) ===== */
+        /* ===== RODAPÉ INSTITUCIONAL ===== */
         .rodape-institucional {
             margin-top: auto;
             background: #f8f9fa;
@@ -693,7 +702,7 @@
             margin-top: 5px;
         }
 
-        /* ===== FICHA DE IMPRESSÃO (oculta na tela) ===== */
+        /* ===== FICHA DE IMPRESSÃO ===== */
         .ficha-impressao {
             display: none;
         }
@@ -712,32 +721,11 @@
                 box-shadow: none !important;
                 background: #fff !important;
             }
-            .header,
-            .header-top,
-            .logo-esquerda,
-            .logo-direita,
-            .titulos,
-            .titulo,
-            .info-versao,
-            .status-conexao,
-            .diagnostico,
-            .analytics-section,
-            .cards-row,
-            .charts-grid,
-            .rankings,
-            .alertas-box,
-            .solicitacoes-box,
-            .seletor-unidade,
-            .btn-pdf,
-            .btn-csv,
-            .busca-container,
-            .section-title,
-            .profissionais,
-            .modal-overlay,
-            .unidade-destaque {
-                display: none !important;
-            }
-            .rodape-institucional {
+            .header, .header-top, .logo-esquerda, .logo-direita, .titulos, .titulo,
+            .info-versao, .status-conexao, .diagnostico, .analytics-section,
+            .cards-row, .charts-grid, .rankings, .alertas-box, .solicitacoes-box,
+            .seletor-unidade, .btn-pdf, .btn-csv, .busca-container, .section-title,
+            .profissionais, .modal-overlay, .unidade-destaque, .rodape-institucional {
                 display: none !important;
             }
             .ficha-impressao {
@@ -891,9 +879,7 @@
     </style>
 </head>
 <body>
-
     <div class="container">
-
         <!-- ===== HEADER ===== -->
         <div class="header">
             <div class="header-top">
@@ -927,7 +913,7 @@
             <button onclick="forcarRecarga()" style="margin-left:4px; background:#28a745; color:white; border:none; padding:2px 12px; border-radius:12px; font-size:12px; cursor:pointer;"><i class="fas fa-refresh"></i> Forçar Recarga</button>
         </div>
 
-        <!-- ===== SEÇÃO DE ANÁLISE AVANÇADA ===== -->
+        <!-- ===== SEÇÃO DE ANÁLISE ===== -->
         <div class="analytics-section" id="analyticsSection">
             <!-- Cards -->
             <div class="cards-row">
@@ -990,11 +976,23 @@
             </div>
 
             <!-- Gráficos -->
-            <div class="charts-grid">
-                <div class="chart-box"><h5><i class="fas fa-chart-bar"></i> Mov. Mensal</h5><canvas id="chartMensal" style="height:150px;"></canvas></div>
-                <div class="chart-box"><h5><i class="fas fa-chart-line"></i> Tendência Semanal</h5><canvas id="chartSemanal" style="height:150px;"></canvas></div>
-                <div class="chart-box"><h5><i class="fas fa-chart-pie"></i> CBO (Top 10)</h5><canvas id="chartCBO" style="height:150px;"></canvas></div>
-                <div class="chart-box"><h5><i class="fas fa-chart-radar"></i> Carga Horária</h5><canvas id="chartRadar" style="height:150px;"></canvas></div>
+            <div class="charts-grid" id="chartsGrid">
+                <div class="chart-box" id="chartBoxMensal" onclick="abrirModalGrafico('mensal')">
+                    <h5><i class="fas fa-chart-bar"></i> Mov. Mensal</h5>
+                    <canvas id="chartMensal" style="height:150px;"></canvas>
+                </div>
+                <div class="chart-box" id="chartBoxSemanal" onclick="abrirModalGrafico('semanal')">
+                    <h5><i class="fas fa-chart-line"></i> Tendência Semanal</h5>
+                    <canvas id="chartSemanal" style="height:150px;"></canvas>
+                </div>
+                <div class="chart-box" id="chartBoxCBO" onclick="abrirModalGrafico('cbo')">
+                    <h5><i class="fas fa-chart-pie"></i> CBO (Top 10)</h5>
+                    <canvas id="chartCBO" style="height:150px;"></canvas>
+                </div>
+                <div class="chart-box" id="chartBoxRadar" onclick="abrirModalGrafico('radar')">
+                    <h5><i class="fas fa-chart-radar"></i> Carga Horária</h5>
+                    <canvas id="chartRadar" style="height:150px;"></canvas>
+                </div>
             </div>
 
             <!-- Rankings -->
@@ -1042,7 +1040,7 @@
             <span class="total-encontrados" id="totalEncontrados">0 encontrados</span>
         </div>
 
-        <!-- ===== DADOS DA UNIDADE (SIMPLIFICADO) ===== -->
+        <!-- ===== DADOS DA UNIDADE ===== -->
         <div class="section-title">1. DADOS DA UNIDADE</div>
         <div class="unidade-destaque">
             <div class="campo">
@@ -1055,7 +1053,7 @@
             </div>
         </div>
 
-        <!-- ===== PROFISSIONAIS (tela) ===== -->
+        <!-- ===== PROFISSIONAIS ===== -->
         <div class="section-title">2. RELAÇÃO DOS PROFISSIONAIS</div>
         <div class="profissionais">
             <table>
@@ -1064,7 +1062,7 @@
             </table>
         </div>
 
-        <!-- ===== RODAPÉ INSTITUCIONAL (tela) ===== -->
+        <!-- ===== RODAPÉ INSTITUCIONAL ===== -->
         <div class="rodape-institucional">
             <p>Desenvolvido por Cristian Marques</p>
             <p>SEMUSA - Secretaria Municipal de Saúde de Porto Velho</p>
@@ -1094,18 +1092,9 @@
                 <table id="tabelaFicha">
                     <thead>
                         <tr>
-                            <th>N°</th>
-                            <th>Ação</th>
-                            <th>Nome Completo</th>
-                            <th>CPF</th>
-                            <th>CBO</th>
-                            <th>Conselho</th>
-                            <th>N° Registro</th>
-                            <th>UF</th>
-                            <th>Cargo/Função</th>
-                            <th>Tipo de Vínculo</th>
-                            <th>Carga Hor.</th>
-                            <th>Setor/Equipe</th>
+                            <th>N°</th><th>Ação</th><th>Nome Completo</th><th>CPF</th><th>CBO</th>
+                            <th>Conselho</th><th>N° Registro</th><th>UF</th><th>Cargo/Função</th>
+                            <th>Tipo de Vínculo</th><th>Carga Hor.</th><th>Setor/Equipe</th>
                         </tr>
                     </thead>
                     <tbody id="tbodyFicha">
@@ -1121,7 +1110,6 @@
                 <p class="copyright">© 2026 - Todos os direitos reservados</p>
             </div>
         </div>
-
     </div>
 
     <!-- ===== MODAIS ===== -->
@@ -1153,6 +1141,14 @@
         </div>
     </div>
 
+    <div class="modal-overlay" id="modalGrafico">
+        <div class="modal-box grafico-ampliado">
+            <button class="close-modal" onclick="fecharModal('modalGrafico')">&times;</button>
+            <h3 id="modalGraficoTitulo">Gráfico Ampliado</h3>
+            <canvas id="graficoAmpliadoCanvas" style="width:100%; height:70vh;"></canvas>
+        </div>
+    </div>
+
     <script>
         (function() {
             'use strict';
@@ -1172,6 +1168,7 @@
                 chartSemanal = null,
                 chartCBO = null,
                 chartRadar = null;
+            let chartAmpliado = null;
             let todasOpcoesSelect = [];
             let subscription = null;
             let atualizando = false;
@@ -2203,7 +2200,7 @@
             ];
 
             // ============================================================
-            // OPÇÕES DE VÍNCULO (COMPLETO)
+            // OPÇÕES DE VÍNCULO (AMPLIADO)
             // ============================================================
             const opcoesVinculo = [
                 "Estatutário",
@@ -2211,7 +2208,13 @@
                 "CLT",
                 "Temporário",
                 "Autônomo",
-                "Outros"
+                "Outros",
+                "Residente",
+                "Contrato Temporário",
+                "Prestador de Serviços",
+                "Cooperado",
+                "Estagiário",
+                "Voluntário"
             ];
 
             // ============================================================
@@ -2952,6 +2955,9 @@
             async function atualizarDashboard() {
                 const profs = todosProfissionais;
                 const unids = todasUnidades;
+                const hoje = new Date().toISOString().split('T')[0];
+
+                // KPIs principais
                 document.getElementById('kpiTotalProf').textContent = profs.length;
                 document.getElementById('kpiTotalUnid').textContent = unids.length;
                 document.getElementById('kpiMedicos').textContent = profs.filter(p => p.cbo && p.cbo.startsWith('2231'))
@@ -2961,9 +2967,14 @@
                 document.getElementById('kpiDentistas').textContent = profs.filter(p => p.cbo && p.cbo.startsWith('2232'))
                     .length;
                 document.getElementById('kpiCBOs').textContent = new Set(profs.map(p => p.cbo).filter(Boolean)).size;
-                const hoje = new Date().toISOString().split('T')[0];
                 document.getElementById('kpiHoje').textContent = profs.filter(p => p.updated_at && p.updated_at.startsWith(
                     hoje)).length;
+
+                // Inclusões hoje (baseado em created_at)
+                const inclusoesHoje = profs.filter(p => p.created_at && p.created_at.startsWith(hoje));
+                document.getElementById('kpiInclusoesHoje').textContent = inclusoesHoje.length;
+
+                // Completude
                 const obrigatorios = ['nome_profissional', 'cpf', 'cbo', 'conselho', 'registro', 'cnes'];
                 let completos = 0;
                 profs.forEach(p => {
@@ -2971,14 +2982,18 @@
                 });
                 document.getElementById('kpiCompletude').textContent = profs.length ? Math.round((completos / profs.length) *
                     100) + '%' : '0%';
+
+                // Movimentações via solicitações (alterações e exclusões)
                 await atualizarMovimentacoesHoje();
+
+                // Gerar gráficos e rankings
                 gerarGraficos(profs);
                 gerarRankings(profs);
                 gerarAlertas(profs);
             }
 
             // ============================================================
-            // MOVIMENTAÇÕES DE HOJE
+            // MOVIMENTAÇÕES DE HOJE (ALTERAÇÕES E EXCLUSÕES)
             // ============================================================
             async function atualizarMovimentacoesHoje() {
                 const hoje = new Date().toISOString().split('T')[0];
@@ -2990,22 +3005,19 @@
                         .gte('aprovado_em', hoje)
                         .lt('aprovado_em', hoje + 'T23:59:59');
                     if (error) throw error;
-                    const inclusoes = data.filter(s => s.tipo === 'insert').length;
                     const alteracoes = data.filter(s => s.tipo === 'update').length;
                     const exclusoes = data.filter(s => s.tipo === 'delete').length;
-                    document.getElementById('kpiInclusoesHoje').textContent = inclusoes;
                     document.getElementById('kpiAlteracoesHoje').textContent = alteracoes;
                     document.getElementById('kpiExclusoesHoje').textContent = exclusoes;
                 } catch (e) {
                     console.error('Erro ao buscar movimentações de hoje:', e);
-                    document.getElementById('kpiInclusoesHoje').textContent = '0';
                     document.getElementById('kpiAlteracoesHoje').textContent = '0';
                     document.getElementById('kpiExclusoesHoje').textContent = '0';
                 }
             }
 
             // ============================================================
-            // GRÁFICOS
+            // GRÁFICOS (com cliques para ampliar)
             // ============================================================
             function gerarGraficos(profs) {
                 // Mensal
@@ -3023,6 +3035,7 @@
                     return nomes[parseInt(mes) - 1] + '/' + ano.slice(2);
                 });
                 const data = sorted.map(m => meses[m]);
+
                 const ctx1 = document.getElementById('chartMensal').getContext('2d');
                 if (chartMensal) chartMensal.destroy();
                 chartMensal = new Chart(ctx1, {
@@ -3115,7 +3128,115 @@
                     options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
                         scales: { r: { beginAtZero: true, ticks: { stepSize: 1 } } } }
                 });
+
+                // Salvar referências para o modal de ampliação
+                window._chartData = {
+                    mensal: { labels, data },
+                    semanal: { labels: labelsDias, data: dataDias },
+                    cbo: { labels: cboLabels, data: cboData, cores },
+                    radar: { labels: Object.keys(faixas), data: Object.values(faixas) }
+                };
             }
+
+            // ============================================================
+            // MODAL DE GRÁFICO AMPLIADO
+            // ============================================================
+            window.abrirModalGrafico = function(tipo) {
+                const modal = document.getElementById('modalGrafico');
+                const titulo = document.getElementById('modalGraficoTitulo');
+                const canvas = document.getElementById('graficoAmpliadoCanvas');
+                const ctx = canvas.getContext('2d');
+
+                // Destruir gráfico anterior se existir
+                if (chartAmpliado) {
+                    chartAmpliado.destroy();
+                    chartAmpliado = null;
+                }
+
+                const dados = window._chartData[tipo];
+                if (!dados) {
+                    alert('Dados do gráfico não disponíveis.');
+                    return;
+                }
+
+                let config = {};
+                switch (tipo) {
+                    case 'mensal':
+                        titulo.textContent = 'Movimentação Mensal (Ampliado)';
+                        config = {
+                            type: 'bar',
+                            data: {
+                                labels: dados.labels,
+                                datasets: [{ label: 'Atualizações', data: dados.data, backgroundColor: '#003c7d' }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: { legend: { display: false } },
+                                scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+                            }
+                        };
+                        break;
+                    case 'semanal':
+                        titulo.textContent = 'Tendência Semanal (Ampliado)';
+                        config = {
+                            type: 'line',
+                            data: {
+                                labels: dados.labels,
+                                datasets: [{ label: 'Movimentações', data: dados.data, borderColor: '#fd7e14',
+                                    backgroundColor: 'rgba(253,126,20,0.1)', fill: true, tension: 0.3 }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: { legend: { display: false } },
+                                scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+                            }
+                        };
+                        break;
+                    case 'cbo':
+                        titulo.textContent = 'CBO (Top 10) - Ampliado';
+                        config = {
+                            type: 'pie',
+                            data: {
+                                labels: dados.labels,
+                                datasets: [{ data: dados.data, backgroundColor: dados.cores }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: { legend: { position: 'bottom', labels: { boxWidth: 15, font: { size: 12 } } } }
+                            }
+                        };
+                        break;
+                    case 'radar':
+                        titulo.textContent = 'Carga Horária - Ampliado';
+                        config = {
+                            type: 'radar',
+                            data: {
+                                labels: dados.labels,
+                                datasets: [{
+                                    label: 'Profissionais',
+                                    data: dados.data,
+                                    backgroundColor: 'rgba(0,60,125,0.2)',
+                                    borderColor: '#003c7d',
+                                    pointBackgroundColor: '#003c7d',
+                                    fill: true
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: { legend: { display: false } },
+                                scales: { r: { beginAtZero: true, ticks: { stepSize: 1 } } }
+                            }
+                        };
+                        break;
+                }
+
+                chartAmpliado = new Chart(ctx, config);
+                modal.classList.add('active');
+            };
 
             // ============================================================
             // RANKINGS
@@ -3349,6 +3470,7 @@
                 let dados = [];
                 let colunas = [];
                 let tituloStr = '';
+                const hoje = new Date().toISOString().split('T')[0];
 
                 switch (tipo) {
                     case 'totalProfissionais':
@@ -3389,7 +3511,6 @@
                         break;
                     case 'hoje':
                         tituloStr = 'Atualizados Hoje';
-                        const hoje = new Date().toISOString().split('T')[0];
                         dados = todosProfissionais.filter(p => p.updated_at && p.updated_at.startsWith(hoje));
                         colunas = ['nome_profissional', 'cpf', 'updated_at'];
                         break;
@@ -3418,8 +3539,8 @@
                         break;
                     case 'inclusoesHoje':
                         tituloStr = 'Inclusões Realizadas Hoje';
-                        dados = await carregarMovimentacoesHojePorTipo('insert');
-                        colunas = ['nome', 'cpf', 'unidade', 'data'];
+                        dados = todosProfissionais.filter(p => p.created_at && p.created_at.startsWith(hoje));
+                        colunas = ['nome_profissional', 'cpf', 'cnes', 'created_at'];
                         break;
                     case 'alteracoesHoje':
                         tituloStr = 'Alterações Realizadas Hoje';
@@ -3448,6 +3569,7 @@
                         'nome_unidade': 'Unidade',
                         'municipio': 'Município',
                         'updated_at': 'Atualizado em',
+                        'created_at': 'Criado em',
                         'nome': 'Nome',
                         'faltam': 'Campos faltantes',
                         'unidade': 'Unidade',
@@ -3469,6 +3591,9 @@
                             if (col.key === 'updated_at' && valor) {
                                 valor = new Date(valor).toLocaleString();
                             }
+                            if (col.key === 'created_at' && valor) {
+                                valor = new Date(valor).toLocaleString();
+                            }
                             if (col.key === 'data' && valor) {
                                 valor = new Date(valor).toLocaleString();
                             }
@@ -3484,7 +3609,7 @@
             };
 
             // ============================================================
-            // CARREGAR MOVIMENTAÇÕES POR TIPO
+            // CARREGAR MOVIMENTAÇÕES POR TIPO (ALTERAÇÕES E EXCLUSÕES)
             // ============================================================
             async function carregarMovimentacoesHojePorTipo(tipo) {
                 const hoje = new Date().toISOString().split('T')[0];
@@ -3507,10 +3632,6 @@
                             cpf = sol.dados_antigos.cpf || 'N/I';
                             cnes = sol.dados_antigos.cnes || 'N/I';
                         } else if (tipo === 'update' && sol.dados_novos) {
-                            nome = sol.dados_novos.nome_profissional || 'N/I';
-                            cpf = sol.dados_novos.cpf || 'N/I';
-                            cnes = sol.dados_novos.cnes || 'N/I';
-                        } else if (tipo === 'insert' && sol.dados_novos) {
                             nome = sol.dados_novos.nome_profissional || 'N/I';
                             cpf = sol.dados_novos.cpf || 'N/I';
                             cnes = sol.dados_novos.cnes || 'N/I';
@@ -3551,6 +3672,10 @@
                 document.getElementById(id).classList.remove('active');
                 if (id === 'modalAprovacaoAlteracao') {
                     solicitacaoEmAprovacao = null;
+                }
+                if (id === 'modalGrafico' && chartAmpliado) {
+                    chartAmpliado.destroy();
+                    chartAmpliado = null;
                 }
             }
 
@@ -3641,9 +3766,9 @@
             window.confirmarAlteracao = confirmarAlteracao;
             window.abrirModalKPI = abrirModalKPI;
             window.excluirProfissional = excluirProfissional;
+            window.abrirModalGrafico = abrirModalGrafico;
 
         })();
     </script>
-
 </body>
 </html>
