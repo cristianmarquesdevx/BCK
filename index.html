@@ -28,9 +28,12 @@
             border: 1px solid #000;
             border-radius: 8px;
             overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
         }
 
-        /* ===== HEADER ===== */
+        /* ===== HEADER (tela) ===== */
         .header {
             border-bottom: 2px solid #003c7d;
         }
@@ -205,7 +208,6 @@
             color: #343a40;
         }
 
-        /* Rankings - removido ranking de unidades */
         .rankings {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -634,7 +636,64 @@
             background: #c82333;
         }
 
-        /* ===== FICHA DE IMPRESSÃO ===== */
+        /* ===== SEÇÃO DADOS DA UNIDADE (simplificada) ===== */
+        .unidade-destaque {
+            background: #f8f9fa;
+            padding: 15px 20px;
+            border-bottom: 2px solid #003c7d;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 30px;
+        }
+        .unidade-destaque .campo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 16px;
+        }
+        .unidade-destaque .campo .rotulo {
+            font-weight: bold;
+            color: #003c7d;
+        }
+        .unidade-destaque .campo .valor {
+            font-weight: bold;
+            font-size: 18px;
+            color: #003c7d;
+            background: #e9ecef;
+            padding: 4px 12px;
+            border-radius: 4px;
+            min-width: 120px;
+        }
+        .unidade-destaque .campo .valor.destaque {
+            background: #dbe5f1;
+            border: 2px solid #003c7d;
+        }
+
+        /* ===== RODAPÉ INSTITUCIONAL (tela) ===== */
+        .rodape-institucional {
+            margin-top: auto;
+            background: #f8f9fa;
+            border-top: 2px solid #003c7d;
+            padding: 15px 20px;
+            text-align: center;
+            font-size: 12px;
+            color: #333;
+        }
+        .rodape-institucional p {
+            margin: 3px 0;
+        }
+        .rodape-institucional .endereco {
+            font-size: 11px;
+            color: #555;
+        }
+        .rodape-institucional .copyright {
+            font-size: 11px;
+            color: #777;
+            margin-top: 5px;
+        }
+
+        /* ===== FICHA DE IMPRESSÃO (oculta na tela) ===== */
         .ficha-impressao {
             display: none;
         }
@@ -674,7 +733,11 @@
             .busca-container,
             .section-title,
             .profissionais,
-            .modal-overlay {
+            .modal-overlay,
+            .unidade-destaque {
+                display: none !important;
+            }
+            .rodape-institucional {
                 display: none !important;
             }
             .ficha-impressao {
@@ -687,36 +750,44 @@
                 margin: 0 auto;
             }
             .ficha-impressao .header-ficha {
-                text-align: center;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
                 margin-bottom: 15px;
                 border-bottom: 2px solid #003c7d;
-                padding-bottom: 12px;
+                padding-bottom: 10px;
             }
-            .ficha-impressao .header-ficha h2 {
+            .ficha-impressao .header-ficha .logo-esquerda-print img,
+            .ficha-impressao .header-ficha .logo-direita-print img {
+                height: 50px;
+            }
+            .ficha-impressao .header-ficha .titulos-print {
+                text-align: center;
+                flex: 1;
+            }
+            .ficha-impressao .header-ficha .titulos-print h2 {
                 color: #003c7d;
-                font-size: 18px;
+                font-size: 16px;
                 margin: 0;
                 font-weight: bold;
-                letter-spacing: 1px;
             }
-            .ficha-impressao .header-ficha h3 {
+            .ficha-impressao .header-ficha .titulos-print h3 {
                 color: #003c7d;
-                font-size: 13px;
+                font-size: 12px;
                 font-weight: normal;
-                margin: 3px 0;
+                margin: 2px 0;
             }
             .ficha-impressao .header-ficha .titulo-ficha {
                 background: #003c7d;
                 color: #fff;
-                padding: 6px 0;
+                padding: 5px 0;
                 font-weight: bold;
-                font-size: 15px;
-                margin: 8px 0 0 0;
+                font-size: 14px;
                 text-align: center;
-                letter-spacing: 0.5px;
+                margin-top: 5px;
             }
             .ficha-impressao .unidade-dados {
-                margin: 12px 0 10px 0;
+                margin: 10px 0 10px 0;
                 font-size: 13px;
                 font-weight: bold;
                 border-bottom: 1px solid #000;
@@ -762,7 +833,7 @@
             .ficha-impressao table thead {
                 display: table-header-group;
             }
-            .ficha-impressao .rodape {
+            .ficha-impressao .rodape-print {
                 margin-top: 25px;
                 font-size: 10px;
                 text-align: center;
@@ -770,15 +841,15 @@
                 padding-top: 12px;
                 color: #333;
             }
-            .ficha-impressao .rodape p {
+            .ficha-impressao .rodape-print p {
                 margin: 3px 0;
                 line-height: 1.4;
             }
-            .ficha-impressao .rodape .endereco {
+            .ficha-impressao .rodape-print .endereco {
                 font-size: 9px;
                 color: #555;
             }
-            .ficha-impressao .rodape .copyright {
+            .ficha-impressao .rodape-print .copyright {
                 font-size: 9px;
                 color: #777;
                 margin-top: 6px;
@@ -811,6 +882,11 @@
                 padding-left: 0;
                 padding-top: 10px;
             }
+            .unidade-destaque {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
         }
     </style>
 </head>
@@ -818,7 +894,7 @@
 
     <div class="container">
 
-        <!-- HEADER -->
+        <!-- ===== HEADER ===== -->
         <div class="header">
             <div class="header-top">
                 <div class="logo-esquerda"><img src="logo_prefeitura.png" alt="Prefeitura" /></div>
@@ -841,7 +917,7 @@
             </div>
         </div>
 
-        <!-- DIAGNÓSTICO -->
+        <!-- ===== DIAGNÓSTICO ===== -->
         <div class="diagnostico" id="diagnostico">
             <span class="passo" id="passo1"><i class="fas fa-circle"></i> 1. Cliente</span>
             <span class="passo" id="passo2"><i class="fas fa-circle"></i> 2. Tabela</span>
@@ -851,7 +927,7 @@
             <button onclick="forcarRecarga()" style="margin-left:4px; background:#28a745; color:white; border:none; padding:2px 12px; border-radius:12px; font-size:12px; cursor:pointer;"><i class="fas fa-refresh"></i> Forçar Recarga</button>
         </div>
 
-        <!-- SEÇÃO DE ANÁLISE AVANÇADA -->
+        <!-- ===== SEÇÃO DE ANÁLISE AVANÇADA ===== -->
         <div class="analytics-section" id="analyticsSection">
             <!-- Cards -->
             <div class="cards-row">
@@ -921,7 +997,7 @@
                 <div class="chart-box"><h5><i class="fas fa-chart-radar"></i> Carga Horária</h5><canvas id="chartRadar" style="height:150px;"></canvas></div>
             </div>
 
-            <!-- Rankings - apenas múltiplas lotações -->
+            <!-- Rankings -->
             <div class="rankings">
                 <div class="ranking-list" style="grid-column: 1 / -1;">
                     <h5><i class="fas fa-people-arrows"></i> Profissionais com múltiplas lotações</h5>
@@ -929,20 +1005,20 @@
                 </div>
             </div>
 
-            <!-- ALERTAS INTELIGENTES -->
+            <!-- ALERTAS -->
             <div class="alertas-box">
                 <h5><i class="fas fa-bell"></i> Alertas Inteligentes</h5>
                 <div id="alertList"><div class="alert-item">Nenhum alerta encontrado.</div></div>
             </div>
 
-            <!-- SOLICITAÇÕES PENDENTES (ADMIN) -->
+            <!-- SOLICITAÇÕES PENDENTES -->
             <div class="solicitacoes-box" id="solicitacoesBox">
                 <h5><i class="fas fa-clock"></i> Solicitações Pendentes (Administrador)</h5>
                 <div id="solicitacoesList"><div style="color:#6c757d; padding:6px 0;">Carregando solicitações...</div></div>
             </div>
         </div>
 
-        <!-- SELETOR DE UNIDADE -->
+        <!-- ===== SELETOR DE UNIDADE ===== -->
         <div class="seletor-unidade">
             <label for="selecionarUnidade">Unidade:</label>
             <input type="text" id="buscaUnidade" placeholder="🔍 Buscar por nome ou CNES..." oninput="filtrarOpcoesUnidade()" />
@@ -954,7 +1030,7 @@
             <button class="btn-csv" onclick="exportarCSV()"><i class="fas fa-file-csv"></i> CSV</button>
         </div>
 
-        <!-- BARRA DE BUSCA GLOBAL + FILTRO ESPECIALIDADE -->
+        <!-- ===== BUSCA GLOBAL ===== -->
         <div class="busca-container">
             <input type="text" id="buscaProfissionais" placeholder="🔍 Buscar por nome, CPF ou especialidade..." oninput="aplicarBuscaGlobal()" />
             <select id="filtroEspecialidade" onchange="aplicarBuscaGlobal()">
@@ -966,17 +1042,20 @@
             <span class="total-encontrados" id="totalEncontrados">0 encontrados</span>
         </div>
 
-        <!-- DADOS DA UNIDADE (tela) -->
+        <!-- ===== DADOS DA UNIDADE (SIMPLIFICADO) ===== -->
         <div class="section-title">1. DADOS DA UNIDADE</div>
-        <table>
-            <tr><td data-label="CNES"><input id="cnes" disabled placeholder="--" /></td><td data-label="Nome"><input id="nomeUnidade" disabled placeholder="--" /></td><td data-label="UF"><input id="uf" disabled placeholder="--" /></td></tr>
-            <tr><td data-label="Tipo"><select id="tipoUnidade" disabled><option value="">--</option></select></td><td data-label="Município"><input id="municipio" disabled placeholder="--" /></td><td></td></tr>
-            <tr><td colspan="3" data-label="Endereço"><input id="endereco" disabled placeholder="--" style="width:100%;" /></td></tr>
-            <tr><td data-label="Telefone"><input id="telefone" disabled placeholder="--" /></td><td colspan="2" data-label="Responsável"><input id="responsavel" disabled placeholder="--" /></td></tr>
-            <tr><td data-label="Cargo"><input id="cargoResponsavel" disabled placeholder="--" /></td><td colspan="2" data-label="Data Preenchimento"><input id="dataPreenchimento" disabled type="date" placeholder="--" /></td></tr>
-        </table>
+        <div class="unidade-destaque">
+            <div class="campo">
+                <span class="rotulo">CNES:</span>
+                <span class="valor destaque" id="cnesDestaque">--</span>
+            </div>
+            <div class="campo">
+                <span class="rotulo">Unidade:</span>
+                <span class="valor destaque" id="nomeUnidadeDestaque">--</span>
+            </div>
+        </div>
 
-        <!-- PROFISSIONAIS (tela) -->
+        <!-- ===== PROFISSIONAIS (tela) ===== -->
         <div class="section-title">2. RELAÇÃO DOS PROFISSIONAIS</div>
         <div class="profissionais">
             <table>
@@ -985,13 +1064,26 @@
             </table>
         </div>
 
+        <!-- ===== RODAPÉ INSTITUCIONAL (tela) ===== -->
+        <div class="rodape-institucional">
+            <p>Desenvolvido por Cristian Marques</p>
+            <p>SEMUSA - Secretaria Municipal de Saúde de Porto Velho</p>
+            <p class="endereco">Avenida Campos Sales, 2283 - Centro - Porto Velho/RO - CEP: 76804-358</p>
+            <p class="endereco">Telefone: (69) 3901-6126 | E-mail: gecav.semusa@portovelho.ro.gov.br</p>
+            <p class="copyright">© 2026 - Todos os direitos reservados</p>
+        </div>
+
         <!-- ===== FICHA DE IMPRESSÃO ===== -->
         <div class="ficha-impressao" id="fichaImpressao">
             <div class="header-ficha">
-                <h2>PREFEITURA DO MUNICÍPIO DE PORTO VELHO</h2>
-                <h3>SECRETARIA MUNICIPAL DE SAÚDE – SEMUSA</h3>
-                <h3>DIVISÃO DE CONTROLE E AVALIAÇÃO DO SUS</h3>
-                <div class="titulo-ficha">PLANILHA DE ATUALIZAÇÃO CADASTRAL DOS PROFISSIONAIS – CNES</div>
+                <div class="logo-esquerda-print"><img src="logo_prefeitura.png" alt="Prefeitura" /></div>
+                <div class="titulos-print">
+                    <h2>PREFEITURA DO MUNICÍPIO DE PORTO VELHO</h2>
+                    <h3>SECRETARIA MUNICIPAL DE SAÚDE – SEMUSA</h3>
+                    <h3>DIVISÃO DE CONTROLE E AVALIAÇÃO DO SUS</h3>
+                    <div class="titulo-ficha">PLANILHA DE ATUALIZAÇÃO CADASTRAL DOS PROFISSIONAIS – CNES</div>
+                </div>
+                <div class="logo-direita-print"><img src="logo_cnes.png" alt="CNES" /></div>
             </div>
             <div class="unidade-dados">
                 <strong>1. UNIDADE DE LOTAÇÃO</strong><br />
@@ -1021,7 +1113,7 @@
                     </tbody>
                 </table>
             </div>
-            <div class="rodape">
+            <div class="rodape-print">
                 <p>Desenvolvido por Cristian Marques</p>
                 <p>SEMUSA - Secretaria Municipal de Saúde de Porto Velho</p>
                 <p class="endereco">Avenida Campos Sales, 2283 - Centro - Porto Velho/RO - CEP: 76804-358</p>
@@ -1032,7 +1124,7 @@
 
     </div>
 
-    <!-- MODAIS -->
+    <!-- ===== MODAIS ===== -->
     <div class="modal-overlay" id="modalAlertas">
         <div class="modal-box">
             <button class="close-modal" onclick="fecharModal('modalAlertas')">&times;</button>
@@ -2298,22 +2390,14 @@
                     if (unidadeAtual !== '__todos__') {
                         const unidade = todasUnidades.find(u => u.cnes === unidadeAtual);
                         if (unidade) {
-                            document.getElementById('cnes').value = unidade.cnes || '';
-                            document.getElementById('nomeUnidade').value = unidade.nome_unidade || '';
-                            document.getElementById('uf').value = unidade.uf || '';
-                            document.getElementById('tipoUnidade').value = unidade.tipo_unidade || '';
-                            document.getElementById('municipio').value = unidade.municipio || '';
-                            document.getElementById('endereco').value = unidade.endereco || '';
-                            document.getElementById('telefone').value = unidade.telefone || '';
-                            document.getElementById('responsavel').value = unidade.responsavel || '';
-                            document.getElementById('cargoResponsavel').value = unidade.cargo_responsavel || '';
-                            document.getElementById('dataEmissao').value = unidade.data_emissao || '';
-                            document.getElementById('dataPreenchimento').value = unidade.data_preenchimento || '';
+                            document.getElementById('cnesDestaque').textContent = unidade.cnes || '--';
+                            document.getElementById('nomeUnidadeDestaque').textContent = unidade.nome_unidade || '--';
                             document.getElementById('fichaCnes').textContent = unidade.cnes || '--';
                             document.getElementById('fichaNomeUnidade').textContent = unidade.nome_unidade || '--';
                         }
                     } else {
-                        limparDadosUnidade();
+                        document.getElementById('cnesDestaque').textContent = '--';
+                        document.getElementById('nomeUnidadeDestaque').textContent = '--';
                         document.getElementById('fichaCnes').textContent = '--';
                         document.getElementById('fichaNomeUnidade').textContent = '--';
                     }
@@ -2371,8 +2455,9 @@
                 profissionaisFiltrados = [...todosProfissionais];
                 await atualizarDashboard();
                 renderizarTabelaProfissionais(profissionaisFiltrados);
-                limparDadosUnidade();
                 document.getElementById('totalEncontrados').textContent = profissionaisFiltrados.length + ' encontrados';
+                document.getElementById('cnesDestaque').textContent = '--';
+                document.getElementById('nomeUnidadeDestaque').textContent = '--';
                 document.getElementById('fichaCnes').textContent = '--';
                 document.getElementById('fichaNomeUnidade').textContent = '--';
                 atualizarFichaImpressao();
@@ -2500,7 +2585,7 @@
             }
 
             // ============================================================
-            // MODAL DE ALTERAÇÃO (COM LISTAS COMPLETAS)
+            // MODAL DE ALTERAÇÃO
             // ============================================================
             function mostrarModalAprovacaoAlteracao(sol) {
                 solicitacaoEmAprovacao = sol;
@@ -2508,7 +2593,6 @@
                 const antigos = sol.dados_antigos || {};
                 const novos = sol.dados_novos || {};
 
-                // Campos com select (CNES, Vínculo, CBO)
                 const camposSelect = {
                     'cnes': {
                         label: 'CNES',
@@ -2747,7 +2831,8 @@
                 if (cnes === '__todos__') {
                     unidadeSelecionada = null;
                     profissionaisFiltrados = [...todosProfissionais];
-                    limparDadosUnidade();
+                    document.getElementById('cnesDestaque').textContent = '--';
+                    document.getElementById('nomeUnidadeDestaque').textContent = '--';
                     document.getElementById('fichaCnes').textContent = '--';
                     document.getElementById('fichaNomeUnidade').textContent = '--';
                 } else {
@@ -2760,23 +2845,15 @@
                             .maybeSingle();
                         if (e1) throw e1;
                         if (unidade) {
-                            document.getElementById('cnes').value = unidade.cnes || '';
-                            document.getElementById('nomeUnidade').value = unidade.nome_unidade || '';
-                            document.getElementById('uf').value = unidade.uf || '';
-                            document.getElementById('tipoUnidade').value = unidade.tipo_unidade || '';
-                            document.getElementById('municipio').value = unidade.municipio || '';
-                            document.getElementById('endereco').value = unidade.endereco || '';
-                            document.getElementById('telefone').value = unidade.telefone || '';
-                            document.getElementById('responsavel').value = unidade.responsavel || '';
-                            document.getElementById('cargoResponsavel').value = unidade.cargo_responsavel || '';
-                            document.getElementById('dataEmissao').value = unidade.data_emissao || '';
-                            document.getElementById('dataPreenchimento').value = unidade.data_preenchimento || '';
+                            document.getElementById('cnesDestaque').textContent = unidade.cnes || '--';
+                            document.getElementById('nomeUnidadeDestaque').textContent = unidade.nome_unidade || '--';
                             document.getElementById('fichaCnes').textContent = unidade.cnes || '--';
                             document.getElementById('fichaNomeUnidade').textContent = unidade.nome_unidade || '--';
                         }
                     } catch (e) {
                         console.error(e);
-                        limparDadosUnidade();
+                        document.getElementById('cnesDestaque').textContent = '--';
+                        document.getElementById('nomeUnidadeDestaque').textContent = '--';
                         document.getElementById('fichaCnes').textContent = '--';
                         document.getElementById('fichaNomeUnidade').textContent = '--';
                     }
@@ -2867,17 +2944,6 @@
                     });
                     tbody.innerHTML = html;
                 }
-            }
-
-            function limparDadosUnidade() {
-                ['cnes', 'nomeUnidade', 'uf', 'tipoUnidade', 'municipio', 'endereco', 'telefone', 'responsavel',
-                    'cargoResponsavel', 'dataEmissao', 'dataPreenchimento'
-                ].forEach(id => {
-                    const el = document.getElementById(id);
-                    if (el) el.value = '';
-                });
-                document.getElementById('fichaCnes').textContent = '--';
-                document.getElementById('fichaNomeUnidade').textContent = '--';
             }
 
             // ============================================================
@@ -3088,7 +3154,7 @@
             }
 
             // ============================================================
-            // ALERTAS (CPF DUPLICADO RESTAURADO)
+            // ALERTAS (CPF DUPLICADO)
             // ============================================================
             function gerarAlertas(profs) {
                 const alertList = document.getElementById('alertList');
