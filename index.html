@@ -384,6 +384,12 @@
         .btn-csv:hover {
             background: #218838 !important;
         }
+        .btn-relatorios {
+            background: #6f42c1;
+        }
+        .btn-relatorios:hover {
+            background: #5a32a3 !important;
+        }
 
         /* ===== BUSCA GLOBAL ===== */
         .busca-container {
@@ -639,10 +645,65 @@
         .modal-box .modal-actions .btn-cancelar:hover {
             background: #c82333;
         }
-        /* Modal do gráfico ampliado */
-        .modal-box.grafico-ampliado canvas {
-            width: 100% !important;
-            height: 70vh !important;
+        .modal-box .filtros-relatorio {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+        .modal-box .filtros-relatorio label {
+            font-weight: bold;
+            font-size: 13px;
+        }
+        .modal-box .filtros-relatorio select,
+        .modal-box .filtros-relatorio input {
+            padding: 5px 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+        .modal-box .filtros-relatorio button {
+            padding: 5px 15px;
+            border: none;
+            border-radius: 4px;
+            background: #003c7d;
+            color: #fff;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .modal-box .filtros-relatorio button:hover {
+            background: #002a5a;
+        }
+        .modal-box .busca-relatorio {
+            margin: 10px 0;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .modal-box .busca-relatorio input {
+            flex: 1;
+            padding: 6px 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+        .modal-box .busca-relatorio span {
+            font-size: 13px;
+            color: #6c757d;
+        }
+        .modal-box .btn-imprimir-relatorio {
+            background: #28a745;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 15px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        .modal-box .btn-imprimir-relatorio:hover {
+            background: #218838;
         }
 
         /* ===== SEÇÃO DADOS DA UNIDADE ===== */
@@ -724,8 +785,9 @@
             .header, .header-top, .logo-esquerda, .logo-direita, .titulos, .titulo,
             .info-versao, .status-conexao, .diagnostico, .analytics-section,
             .cards-row, .charts-grid, .rankings, .alertas-box, .solicitacoes-box,
-            .seletor-unidade, .btn-pdf, .btn-csv, .busca-container, .section-title,
-            .profissionais, .modal-overlay, .unidade-destaque, .rodape-institucional {
+            .seletor-unidade, .btn-pdf, .btn-csv, .btn-relatorios, .busca-container,
+            .section-title, .profissionais, .modal-overlay, .unidade-destaque,
+            .rodape-institucional {
                 display: none !important;
             }
             .ficha-impressao {
@@ -848,6 +910,10 @@
             .container {
                 background: #fff !important;
             }
+            /* Impressão do relatório (quando acionado via botão) */
+            .modal-box .btn-imprimir-relatorio {
+                display: none !important;
+            }
         }
 
         @media (max-width: 768px) {
@@ -874,6 +940,10 @@
                 flex-direction: column;
                 align-items: flex-start;
                 gap: 10px;
+            }
+            .modal-box .filtros-relatorio {
+                flex-direction: column;
+                align-items: stretch;
             }
         }
     </style>
@@ -1026,6 +1096,7 @@
             <button id="btnCarregar" onclick="aplicarFiltroUnidade()"><i class="fas fa-search"></i> Filtrar</button>
             <button class="btn-pdf" onclick="window.print()"><i class="fas fa-file-pdf"></i> Exportar PDF</button>
             <button class="btn-csv" onclick="exportarCSV()"><i class="fas fa-file-csv"></i> CSV</button>
+            <button class="btn-relatorios" onclick="abrirModalRelatorios()"><i class="fas fa-chart-line"></i> Relatórios</button>
         </div>
 
         <!-- ===== BUSCA GLOBAL ===== -->
@@ -1149,6 +1220,48 @@
         </div>
     </div>
 
+    <!-- MODAL DE RELATÓRIOS -->
+    <div class="modal-overlay" id="modalRelatorios">
+        <div class="modal-box">
+            <button class="close-modal" onclick="fecharModal('modalRelatorios')">&times;</button>
+            <h3 id="modalRelatoriosTitulo">Relatórios de Movimentação</h3>
+            <div class="filtros-relatorio">
+                <label>Tipo:</label>
+                <select id="filtroTipoRelatorio">
+                    <option value="todos">Todos</option>
+                    <option value="insert">Inclusão</option>
+                    <option value="update">Alteração</option>
+                    <option value="delete">Exclusão</option>
+                </select>
+                <label>Período:</label>
+                <select id="filtroPeriodoRelatorio">
+                    <option value="diario">Diário</option>
+                    <option value="semanal">Semanal</option>
+                    <option value="mensal">Mensal</option>
+                    <option value="personalizado">Personalizado</option>
+                </select>
+                <label>CNES:</label>
+                <input type="text" id="filtroCnesRelatorioInput" placeholder="Digite nome ou CNES..." list="cnesList" style="flex:1; min-width:150px;" />
+                <datalist id="cnesList"></datalist>
+                <div id="campoDataPersonalizado" style="display:none;">
+                    <label>De:</label>
+                    <input type="date" id="dataInicioRelatorio" />
+                    <label>Até:</label>
+                    <input type="date" id="dataFimRelatorio" />
+                </div>
+                <button onclick="gerarRelatorio()"><i class="fas fa-search"></i> Gerar</button>
+            </div>
+            <div class="busca-relatorio">
+                <input type="text" id="buscaRelatorio" placeholder="🔍 Filtrar na lista..." oninput="filtrarRelatorio()" />
+                <span id="totalRelatorio">0 registros</span>
+            </div>
+            <div id="conteudoRelatorio" style="max-height:400px; overflow-y:auto;">
+                <p style="color:#6c757d; text-align:center;">Selecione os filtros e clique em "Gerar".</p>
+            </div>
+            <button class="btn-imprimir-relatorio" onclick="imprimirRelatorio()"><i class="fas fa-print"></i> Imprimir Relatório</button>
+        </div>
+    </div>
+
     <script>
         (function() {
             'use strict';
@@ -1174,6 +1287,7 @@
             let atualizando = false;
             let solicitacoesPendentes = [];
             let solicitacaoEmAprovacao = null;
+            let dadosRelatorio = [];
 
             // ============================================================
             // LISTA COMPLETA DE CBOs (TODOS OS CÓDIGOS FORNECIDOS)
@@ -2200,7 +2314,7 @@
             ];
 
             // ============================================================
-            // OPÇÕES DE VÍNCULO (AMPLIADO)
+            // OPÇÕES DE VÍNCULO
             // ============================================================
             const opcoesVinculo = [
                 "Estatutário",
@@ -2365,6 +2479,15 @@
                         select.value = '__todos__';
                     }
 
+                    // Atualizar datalist do relatório
+                    const datalist = document.getElementById('cnesList');
+                    datalist.innerHTML = '';
+                    todasUnidades.forEach(u => {
+                        const opt = document.createElement('option');
+                        opt.value = u.cnes + ' - ' + u.nome_unidade;
+                        datalist.appendChild(opt);
+                    });
+
                     const unidadeAtual = document.getElementById('selecionarUnidade').value;
                     const buscaGlobal = document.getElementById('buscaProfissionais').value.trim();
 
@@ -2464,6 +2587,14 @@
                 document.getElementById('fichaCnes').textContent = '--';
                 document.getElementById('fichaNomeUnidade').textContent = '--';
                 atualizarFichaImpressao();
+
+                // Preencher datalist do relatório
+                const datalist = document.getElementById('cnesList');
+                todasUnidades.forEach(u => {
+                    const opt = document.createElement('option');
+                    opt.value = u.cnes + ' - ' + u.nome_unidade;
+                    datalist.appendChild(opt);
+                });
             }
 
             // ============================================================
@@ -2957,7 +3088,6 @@
                 const unids = todasUnidades;
                 const hoje = new Date().toISOString().split('T')[0];
 
-                // KPIs principais
                 document.getElementById('kpiTotalProf').textContent = profs.length;
                 document.getElementById('kpiTotalUnid').textContent = unids.length;
                 document.getElementById('kpiMedicos').textContent = profs.filter(p => p.cbo && p.cbo.startsWith('2231'))
@@ -2970,11 +3100,9 @@
                 document.getElementById('kpiHoje').textContent = profs.filter(p => p.updated_at && p.updated_at.startsWith(
                     hoje)).length;
 
-                // Inclusões hoje (baseado em created_at)
                 const inclusoesHoje = profs.filter(p => p.created_at && p.created_at.startsWith(hoje));
                 document.getElementById('kpiInclusoesHoje').textContent = inclusoesHoje.length;
 
-                // Completude
                 const obrigatorios = ['nome_profissional', 'cpf', 'cbo', 'conselho', 'registro', 'cnes'];
                 let completos = 0;
                 profs.forEach(p => {
@@ -2983,18 +3111,13 @@
                 document.getElementById('kpiCompletude').textContent = profs.length ? Math.round((completos / profs.length) *
                     100) + '%' : '0%';
 
-                // Movimentações via solicitações (alterações e exclusões)
                 await atualizarMovimentacoesHoje();
 
-                // Gerar gráficos e rankings
                 gerarGraficos(profs);
                 gerarRankings(profs);
                 gerarAlertas(profs);
             }
 
-            // ============================================================
-            // MOVIMENTAÇÕES DE HOJE (ALTERAÇÕES E EXCLUSÕES)
-            // ============================================================
             async function atualizarMovimentacoesHoje() {
                 const hoje = new Date().toISOString().split('T')[0];
                 try {
@@ -3017,7 +3140,7 @@
             }
 
             // ============================================================
-            // GRÁFICOS (com cliques para ampliar)
+            // GRÁFICOS
             // ============================================================
             function gerarGraficos(profs) {
                 // Mensal
@@ -3129,7 +3252,6 @@
                         scales: { r: { beginAtZero: true, ticks: { stepSize: 1 } } } }
                 });
 
-                // Salvar referências para o modal de ampliação
                 window._chartData = {
                     mensal: { labels, data },
                     semanal: { labels: labelsDias, data: dataDias },
@@ -3147,7 +3269,6 @@
                 const canvas = document.getElementById('graficoAmpliadoCanvas');
                 const ctx = canvas.getContext('2d');
 
-                // Destruir gráfico anterior se existir
                 if (chartAmpliado) {
                     chartAmpliado.destroy();
                     chartAmpliado = null;
@@ -3275,13 +3396,12 @@
             }
 
             // ============================================================
-            // ALERTAS (CPF DUPLICADO)
+            // ALERTAS
             // ============================================================
             function gerarAlertas(profs) {
                 const alertList = document.getElementById('alertList');
                 const alerts = [];
 
-                // CPF duplicado na mesma unidade
                 const cpfUnidadeMap = {};
                 profs.forEach(p => {
                     if (p.cpf && p.cnes) {
@@ -3323,7 +3443,6 @@
                     });
                 }
 
-                // Outros alertas
                 const orfaos = profs.filter(p => p.cnes && !todasUnidades.some(u => u.cnes === p.cnes));
                 if (orfaos.length) {
                     alerts.push({
@@ -3409,9 +3528,6 @@
                 }
             }
 
-            // ============================================================
-            // MODAL PARA ALERTAS
-            // ============================================================
             function abrirModalAlertas(titulo, dados, colunas, temAcao) {
                 document.getElementById('modalAlertasTitulo').textContent = titulo;
                 const conteudo = document.getElementById('modalAlertasConteudo');
@@ -3439,9 +3555,6 @@
                 document.getElementById('modalAlertas').classList.add('active');
             }
 
-            // ============================================================
-            // EXCLUIR PROFISSIONAL
-            // ============================================================
             window.excluirProfissional = async function(id) {
                 if (!confirm('Deseja realmente excluir este profissional? Esta ação é irreversível.')) return;
                 try {
@@ -3609,7 +3722,7 @@
             };
 
             // ============================================================
-            // CARREGAR MOVIMENTAÇÕES POR TIPO (ALTERAÇÕES E EXCLUSÕES)
+            // CARREGAR MOVIMENTAÇÕES POR TIPO
             // ============================================================
             async function carregarMovimentacoesHojePorTipo(tipo) {
                 const hoje = new Date().toISOString().split('T')[0];
@@ -3666,6 +3779,265 @@
             }
 
             // ============================================================
+            // RELATÓRIOS (CORRIGIDO)
+            // ============================================================
+            window.abrirModalRelatorios = function() {
+                document.getElementById('modalRelatorios').classList.add('active');
+                const hoje = new Date().toISOString().split('T')[0];
+                document.getElementById('dataInicioRelatorio').value = hoje;
+                document.getElementById('dataFimRelatorio').value = hoje;
+                document.getElementById('conteudoRelatorio').innerHTML =
+                    '<p style="color:#6c757d; text-align:center;">Selecione os filtros e clique em "Gerar".</p>';
+                document.getElementById('totalRelatorio').textContent = '0 registros';
+                document.getElementById('buscaRelatorio').value = '';
+                document.getElementById('filtroCnesRelatorioInput').value = '';
+            };
+
+            window.gerarRelatorio = async function() {
+                const tipo = document.getElementById('filtroTipoRelatorio').value;
+                const periodo = document.getElementById('filtroPeriodoRelatorio').value;
+                const cnesInput = document.getElementById('filtroCnesRelatorioInput').value.trim();
+                let dataInicio, dataFim;
+
+                const hoje = new Date();
+                const hojeStr = hoje.toISOString().split('T')[0];
+
+                if (periodo === 'diario') {
+                    dataInicio = hojeStr;
+                    dataFim = hojeStr;
+                } else if (periodo === 'semanal') {
+                    const inicioSemana = new Date(hoje);
+                    inicioSemana.setDate(hoje.getDate() - 7);
+                    dataInicio = inicioSemana.toISOString().split('T')[0];
+                    dataFim = hojeStr;
+                } else if (periodo === 'mensal') {
+                    const inicioMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+                    dataInicio = inicioMes.toISOString().split('T')[0];
+                    dataFim = hojeStr;
+                } else { // personalizado
+                    dataInicio = document.getElementById('dataInicioRelatorio').value;
+                    dataFim = document.getElementById('dataFimRelatorio').value;
+                    if (!dataInicio || !dataFim) {
+                        alert('Selecione as datas para o período personalizado.');
+                        return;
+                    }
+                }
+
+                // Determinar CNES filtrado
+                let cnesFiltro = null;
+                if (cnesInput !== '') {
+                    const unidade = todasUnidades.find(u =>
+                        u.cnes === cnesInput ||
+                        u.nome_unidade.toLowerCase().includes(cnesInput.toLowerCase())
+                    );
+                    if (unidade) {
+                        cnesFiltro = unidade.cnes;
+                    } else {
+                        alert('Unidade não encontrada. Verifique o nome ou CNES digitado.');
+                        return;
+                    }
+                }
+
+                let resultados = [];
+
+                // 1. Buscar inclusões (da tabela profissionais)
+                if (tipo === 'todos' || tipo === 'insert') {
+                    let query = supabaseClient
+                        .from('profissionais')
+                        .select('*')
+                        .gte('created_at', dataInicio + 'T00:00:00')
+                        .lte('created_at', dataFim + 'T23:59:59.999');
+                    if (cnesFiltro) {
+                        query = query.eq('cnes', cnesFiltro);
+                    }
+                    const { data, error } = await query.order('created_at', { ascending: true });
+                    if (error) {
+                        console.error('Erro ao buscar inclusões:', error);
+                    } else if (data) {
+                        data.forEach(p => {
+                            const unidade = todasUnidades.find(u => u.cnes === p.cnes);
+                            resultados.push({
+                                nome: p.nome_profissional || 'N/I',
+                                cpf: p.cpf || 'N/I',
+                                unidade: unidade ? unidade.nome_unidade : (p.cnes || 'N/I'),
+                                tipo: 'Inclusão',
+                                data: p.created_at,
+                                origem: 'profissional'
+                            });
+                        });
+                    }
+                }
+
+                // 2. Buscar alterações e exclusões (da tabela solicitacoes)
+                if (tipo === 'todos' || tipo === 'update' || tipo === 'delete') {
+                    let query = supabaseClient
+                        .from('solicitacoes')
+                        .select('*')
+                        .eq('status', 'aprovado')
+                        .gte('aprovado_em', dataInicio + 'T00:00:00')
+                        .lte('aprovado_em', dataFim + 'T23:59:59.999');
+                    if (tipo !== 'todos') {
+                        query = query.eq('tipo', tipo);
+                    }
+                    const { data, error } = await query.order('aprovado_em', { ascending: true });
+                    if (error) {
+                        console.error('Erro ao buscar solicitações:', error);
+                    } else if (data) {
+                        const tipoLabel = { 'update': 'Alteração', 'delete': 'Exclusão' };
+                        for (const sol of data) {
+                            let nome = 'N/I',
+                                cpf = 'N/I',
+                                cnes = 'N/I';
+                            if (sol.tipo === 'delete' && sol.dados_antigos) {
+                                nome = sol.dados_antigos.nome_profissional || 'N/I';
+                                cpf = sol.dados_antigos.cpf || 'N/I';
+                                cnes = sol.dados_antigos.cnes || 'N/I';
+                            } else if (sol.tipo === 'update' && sol.dados_novos) {
+                                nome = sol.dados_novos.nome_profissional || 'N/I';
+                                cpf = sol.dados_novos.cpf || 'N/I';
+                                cnes = sol.dados_novos.cnes || 'N/I';
+                            } else {
+                                if (sol.profissional_id) {
+                                    const { data: prof, error: e2 } = await supabaseClient
+                                        .from('profissionais')
+                                        .select('nome_profissional, cpf, cnes')
+                                        .eq('id', sol.profissional_id)
+                                        .single();
+                                    if (!e2 && prof) {
+                                        nome = prof.nome_profissional || 'N/I';
+                                        cpf = prof.cpf || 'N/I';
+                                        cnes = prof.cnes || 'N/I';
+                                    }
+                                }
+                            }
+                            if (cnesFiltro && cnes !== cnesFiltro) continue;
+                            const unidade = todasUnidades.find(u => u.cnes === cnes);
+                            resultados.push({
+                                nome: nome,
+                                cpf: cpf,
+                                unidade: unidade ? unidade.nome_unidade : (cnes || 'N/I'),
+                                tipo: tipoLabel[sol.tipo] || sol.tipo,
+                                data: sol.aprovado_em,
+                                origem: 'solicitacao'
+                            });
+                        }
+                    }
+                }
+
+                resultados.sort((a, b) => new Date(a.data) - new Date(b.data));
+                dadosRelatorio = resultados;
+
+                exibirRelatorio(resultados);
+            };
+
+            function exibirRelatorio(dados) {
+                const container = document.getElementById('conteudoRelatorio');
+                if (!dados || dados.length === 0) {
+                    container.innerHTML = '<p style="color:#6c757d; text-align:center;">Nenhum registro encontrado para o período selecionado.</p>';
+                    document.getElementById('totalRelatorio').textContent = '0 registros';
+                    return;
+                }
+
+                let html = `
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>CPF</th>
+                                <th>Unidade</th>
+                                <th>Tipo</th>
+                                <th>Data/Hora</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                dados.forEach(item => {
+                    const dataFormatada = new Date(item.data).toLocaleString('pt-BR', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit'
+                    });
+                    html += `
+                        <tr>
+                            <td>${item.nome}</td>
+                            <td>${item.cpf}</td>
+                            <td>${item.unidade}</td>
+                            <td>${item.tipo}</td>
+                            <td>${dataFormatada}</td>
+                        </tr>
+                    `;
+                });
+                html += `
+                        </tbody>
+                    </table>
+                `;
+                container.innerHTML = html;
+                document.getElementById('totalRelatorio').textContent = dados.length + ' registros';
+                document.getElementById('buscaRelatorio').value = '';
+            }
+
+            window.filtrarRelatorio = function() {
+                const termo = document.getElementById('buscaRelatorio').value.toLowerCase();
+                const linhas = document.querySelectorAll('#conteudoRelatorio table tbody tr');
+                let visiveis = 0;
+                linhas.forEach(row => {
+                    const texto = row.textContent.toLowerCase();
+                    const match = texto.includes(termo);
+                    row.style.display = match ? '' : 'none';
+                    if (match) visiveis++;
+                });
+                document.getElementById('totalRelatorio').textContent = visiveis + ' registros (filtrados)';
+            };
+
+            window.imprimirRelatorio = function() {
+                const conteudo = document.getElementById('conteudoRelatorio');
+                if (!conteudo || !conteudo.querySelector('table')) {
+                    alert('Gere o relatório antes de imprimir.');
+                    return;
+                }
+
+                const win = window.open('', '_blank', 'width=900,height=700');
+                const titulo = document.getElementById('modalRelatoriosTitulo').textContent;
+                const dataAtual = new Date().toLocaleString('pt-BR');
+                win.document.write(`
+                    <html>
+                    <head>
+                        <title>Relatório de Movimentações</title>
+                        <style>
+                            body { font-family: Arial, sans-serif; padding: 20px; }
+                            h2 { color: #003c7d; border-bottom: 2px solid #003c7d; padding-bottom: 10px; }
+                            table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+                            th { background: #dbe5f1; border: 1px solid #000; padding: 6px; text-align: center; font-size: 12px; }
+                            td { border: 1px solid #000; padding: 5px; text-align: center; font-size: 11px; }
+                            .rodape { margin-top: 30px; text-align: center; font-size: 11px; border-top: 1px solid #ccc; padding-top: 15px; color: #555; }
+                            .data-geracao { color: #666; font-size: 12px; margin-top: 5px; }
+                        </style>
+                    </head>
+                    <body>
+                        <h2>${titulo}</h2>
+                        <p class="data-geracao">Gerado em: ${dataAtual}</p>
+                        ${conteudo.innerHTML}
+                        <div class="rodape">
+                            <p>Desenvolvido por Cristian Marques</p>
+                            <p>SEMUSA - Secretaria Municipal de Saúde de Porto Velho</p>
+                            <p>Avenida Campos Sales, 2283 - Centro - Porto Velho/RO - CEP: 76804-358</p>
+                            <p>Telefone: (69) 3901-6126 | E-mail: gecav.semusa@portovelho.ro.gov.br</p>
+                            <p>© 2026 - Todos os direitos reservados</p>
+                        </div>
+                        <script>
+                            window.print();
+                            window.close();
+                        <\/script>
+                    </body>
+                    </html>
+                `);
+                win.document.close();
+            };
+
+            // ============================================================
             // FECHAR MODAL
             // ============================================================
             function fecharModal(id) {
@@ -3676,6 +4048,12 @@
                 if (id === 'modalGrafico' && chartAmpliado) {
                     chartAmpliado.destroy();
                     chartAmpliado = null;
+                }
+                if (id === 'modalRelatorios') {
+                    document.getElementById('conteudoRelatorio').innerHTML =
+                        '<p style="color:#6c757d; text-align:center;">Selecione os filtros e clique em "Gerar".</p>';
+                    document.getElementById('totalRelatorio').textContent = '0 registros';
+                    dadosRelatorio = [];
                 }
             }
 
@@ -3750,6 +4128,11 @@
             window.onload = function() {
                 document.getElementById('dataEmissao').value = new Date().toISOString().split('T')[0];
                 executarDiagnostico();
+
+                document.getElementById('filtroPeriodoRelatorio').addEventListener('change', function() {
+                    const campo = document.getElementById('campoDataPersonalizado');
+                    campo.style.display = this.value === 'personalizado' ? 'inline-flex' : 'none';
+                });
             };
 
             // Expor funções globalmente
@@ -3767,8 +4150,13 @@
             window.abrirModalKPI = abrirModalKPI;
             window.excluirProfissional = excluirProfissional;
             window.abrirModalGrafico = abrirModalGrafico;
+            window.abrirModalRelatorios = abrirModalRelatorios;
+            window.gerarRelatorio = gerarRelatorio;
+            window.filtrarRelatorio = filtrarRelatorio;
+            window.imprimirRelatorio = imprimirRelatorio;
 
         })();
     </script>
+
 </body>
 </html>
